@@ -1,0 +1,19 @@
+apply plugin: 'com.android.library'
+android {
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 27
+    }
+}
+repositories {
+    flatDir {
+        dirs '../libs'
+    }
+}
+apply from: 'build.release.gradle'
+dependencies {
+    implementation project(':openCVLibrary310')
+}
