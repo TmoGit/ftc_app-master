@@ -13,9 +13,9 @@ import ftc.evlib.util.StepTimer;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
- * Date Created: 9/19/16
- *
- * Manages what algorithms control the rotation and translation of the mecanum wheels
+ *  * Date Created: 9/19/16
+ *  *
+ *  * Manages what algorithms control the rotation and translation of the mecanum wheels
  * This allows you to mix and match rotation and translation (x and y) controllers and change them whenever you want
  *
  * @see MecanumMotors

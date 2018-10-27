@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.common.collect.ImmutableList;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.List;
@@ -42,7 +43,7 @@ import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
 /**
  * This file was made by the electronVolts, FTC team 7393
- * Date Created: 9/2/17
+ *  * Date Created: 9/2/17
  */
 
 public class RobotCfg2018 extends RobotCfg {
@@ -64,6 +65,14 @@ public class RobotCfg2018 extends RobotCfg {
     private static final int LINE_SENSOR_SHORT_READINGS = 3;
     private final List<Logger.Column> loggerColumns;
 
+    //Defining Motors
+    public DcMotor Motor_ArmBase = null;
+    public DcMotor Motor_LiftLeft = null;
+    public DcMotor Motor_LiftRight = null;
+    public DcMotor Motor_WheelFL = null;
+    public DcMotor Motor_WheelFR = null;
+    public DcMotor Motor_WheelBL = null;
+    public DcMotor Motor_WheelBR = null;
 
 
 
@@ -130,6 +139,16 @@ public class RobotCfg2018 extends RobotCfg {
 
         servos=new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
 
+        //This is where we intilize the motors
+
+        Motor_WheelFL = hardwareMap.get(DcMotor.class, "Motor_WheelFL");
+        Motor_WheelFR = hardwareMap.get(DcMotor.class, "Motor_WheelFR");
+        Motor_WheelBL = hardwareMap.get(DcMotor.class, "Motor_WheelBL ");
+        Motor_WheelBR = hardwareMap.get(DcMotor.class, "Motor_WheelBR");
+        Motor_ArmBase = hardwareMap.get(DcMotor.class, "Motor_ArmBase");
+        Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
+        Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
+
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 //        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
 //        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -156,10 +175,10 @@ public class RobotCfg2018 extends RobotCfg {
         //Motors setup
         ServoControl colorServo = getServo(MainServoName.SENSOR);
         mecanumControl = new MecanumControl(new MecanumMotors(
-                Motors.withEncoder(hardwareMap.dcMotor.get("0"), true, true, stoppers),
-                Motors.withEncoder(hardwareMap.dcMotor.get("1") , false, true, stoppers),
-                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("2") , true, true, stoppers),scaleFactor),
-                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("3") , false, true, stoppers),scaleFactor),
+                Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelFL"), true, true, stoppers),
+                Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelFR") , false, true, stoppers),
+                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelBL") , true, true, stoppers),scaleFactor),
+                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WHeelBR") , false, true, stoppers),scaleFactor),
                 true, MAX_ROBOT_SPEED,MAX_ROBOT_SPEED_SIDEWAYS));
 
         loggerColumns = ImmutableList.of(
