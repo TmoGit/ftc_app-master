@@ -176,7 +176,7 @@ public class RobotCfg2018 extends RobotCfg {
         ServoControl colorServo = getServo(MainServoName.SENSOR);
         mecanumControl = new MecanumControl(new MecanumMotors(
                 Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelFL"), true, true, stoppers),
-                Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelFR") , false, true, stoppers),
+                Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelFR"), false, true, stoppers),
                 Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelBL") , true, true, stoppers),scaleFactor),
                 Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WHeelBR") , false, true, stoppers),scaleFactor),
                 true, MAX_ROBOT_SPEED,MAX_ROBOT_SPEED_SIDEWAYS));
