@@ -74,6 +74,10 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelBL = null;
     public DcMotor Motor_WheelBR = null;
 
+    //Arm Variables
+    public double Arm_Down = 0.0;
+    public double Arm_Up = 0.0;
+
 
 
 //    public MainRobotCfg(HardwareMap hardwareMap) {
@@ -175,11 +179,13 @@ public class RobotCfg2018 extends RobotCfg {
         //Motors setup
         ServoControl colorServo = getServo(MainServoName.SENSOR);
         mecanumControl = new MecanumControl(new MecanumMotors(
-                Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelFL"), true, true, stoppers),
-                Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelFR"), false, true, stoppers),
-                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WheelBL") , true, true, stoppers),scaleFactor),
-                Motors.scale(Motors.withEncoder(hardwareMap.dcMotor.get("Motor_WHeelBR") , false, true, stoppers),scaleFactor),
+                Motors.withEncoder(Motor_WheelFL, true, true, stoppers),
+                Motors.withEncoder(Motor_WheelFR, false, true, stoppers),
+                Motors.scale(Motors.withEncoder(Motor_WheelBL , true, true, stoppers),scaleFactor),
+                Motors.scale(Motors.withEncoder(Motor_WheelBR , false, true, stoppers),scaleFactor),
                 true, MAX_ROBOT_SPEED,MAX_ROBOT_SPEED_SIDEWAYS));
+
+
 
         loggerColumns = ImmutableList.of(
                 //robot motion

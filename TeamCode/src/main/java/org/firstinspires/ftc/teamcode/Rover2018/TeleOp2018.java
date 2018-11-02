@@ -28,6 +28,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor rightY;
     ScalingInputExtractor leftX;
     ScalingInputExtractor rightX;
+    
 
     class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
@@ -113,6 +114,11 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
+    }
+
+    private void Arm_Control()
+    {
+
     }
 
     @Override
