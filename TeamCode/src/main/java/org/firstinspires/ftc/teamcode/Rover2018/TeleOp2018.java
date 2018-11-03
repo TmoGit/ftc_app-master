@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
+import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.teamcode.Rover2018.RobotCfg2018;
 
@@ -19,6 +20,8 @@ import ftc.evlib.opmodes.AbstractTeleOp;
 
 
 
+
+
 /**
  * Created by ftc7393 on 11/24/2017.
  */
@@ -28,7 +31,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor rightY;
     ScalingInputExtractor leftX;
     ScalingInputExtractor rightX;
-    
+
 
     class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
@@ -63,10 +66,14 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         return Functions.eBased(5);
     }
 
-    @Override
-    protected RobotCfg2018 createRobotCfg() {
-        return new RobotCfg2018(hardwareMap);
-    }
+  @Override
+  protected RobotCfg2018 createRobotCfg() {
+  RobotCfg2018 robot  = new RobotCfg2018(hardwareMap);
+      return robot;
+   }
+
+
+
 
     @Override
     protected Logger createLogger() {
@@ -118,7 +125,17 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     private void Arm_Control()
     {
+        //Arm Variables
+        double Arm_Down = 0.0;
+        double Arm_Up = 0.0;
 
+
+
+        Arm_Down = driver2.left_trigger.getRawValue();
+        Arm_Up = driver2.right_trigger.getRawValue();
+
+        createRobotCfg().Motor_ArmBase.setPower(Arm_Down);
+        createRobotCfg().Motor_ArmBase.setPower(-Arm_Up);
     }
 
     @Override

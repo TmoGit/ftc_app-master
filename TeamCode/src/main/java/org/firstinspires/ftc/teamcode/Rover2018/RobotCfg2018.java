@@ -74,9 +74,7 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelBL = null;
     public DcMotor Motor_WheelBR = null;
 
-    //Arm Variables
-    public double Arm_Down = 0.0;
-    public double Arm_Up = 0.0;
+
 
 
 
@@ -152,6 +150,9 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_ArmBase = hardwareMap.get(DcMotor.class, "Motor_ArmBase");
         Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
+
+        Motor_ArmBase.setPower(0.0);
+        Motor_ArmBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 //        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
