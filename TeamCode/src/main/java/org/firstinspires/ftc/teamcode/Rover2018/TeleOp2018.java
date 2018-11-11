@@ -31,6 +31,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor rightY;
     ScalingInputExtractor leftX;
     ScalingInputExtractor rightX;
+    ScalingInputExtractor Arm_rightY;
+    ScalingInputExtractor Lift_leftY;
 
 
     class ScalingInputExtractor implements InputExtractor<Double> {
@@ -114,34 +116,48 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     private void forwardControl() {
         double f = currentSpeedFactor.getFactor();
-        rightY = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_y), f);
-        leftX = new ScalingInputExtractor(InputExtractors.negative(driver1.left_stick_x), f);
-        rightX = new ScalingInputExtractor(driver1.right_stick_x, f);
+        rightY = new ScalingInputExtractor(InputExtractors.negative(driver1.left_stick_y), f);
+        leftX = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_x), f);
+        rightX = new ScalingInputExtractor(driver1.left_stick_x, f);
         //noinspection SuspiciousNameCombination
         robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
+
+
+        Arm_Control();
+        Lift_Control();
     }
 
     private void Arm_Control()
     {
-        //Arm Variables
-        double Arm_Down = 0.0;
-        double Arm_Up = 0.0;
 
+        double f = currentSpeedFactor.getFactor();
+        Arm_rightY = new ScalingInputExtractor(driver2.left_stick_y, f);
+        robotCfg.Motor_ArmBase.setPower(Arm_rightY.getValue());
 
+        telemetry.addData("Arm Movement: ", Arm_rightY.getValue());
+        telemetry.update();
 
-        Arm_Down = driver2.left_trigger.getRawValue();
-        Arm_Up = driver2.right_trigger.getRawValue();
+    }
 
-        createRobotCfg().Motor_ArmBase.setPower(Arm_Down);
-        createRobotCfg().Motor_ArmBase.setPower(-Arm_Up);
+    private void Lift_Control()
+    {
+
+        double f = currentSpeedFactor.getFactor();
+        Lift_leftY = new ScalingInputExtractor(driver2.right_stick_y, f);
+        robotCfg.Motor_LiftLeft.setPower(Lift_leftY.getValue());
+        robotCfg.Motor_LiftLeft.setPower(-Lift_leftY.getValue());
+
+        telemetry.addData("Lift Movement: ", Lift_leftY.getValue());
+        telemetry.update();
+
     }
 
     @Override
     protected void go() {
         forwardControl();
-        Arm_Control();
+
     }
 
     @Override
@@ -166,10 +182,14 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
 
         if(driver1.right_bumper.justPressed()){
-
+            robotCfg.Motor_ArmBase.setPower(1);
+            telemetry.addData("Lift Movement ", "UP");
+            telemetry.update();
         }
         if(driver1.left_bumper.justPressed()){
-
+            robotCfg.Motor_ArmBase.setPower(-1);
+            telemetry.addData("Lift Movement ", "DOWN");
+            telemetry.update();
         }
 
         if(driver1.dpad_up.isPressed() && !driver1.dpad_right.isPressed() && !driver1.dpad_left.isPressed()){
