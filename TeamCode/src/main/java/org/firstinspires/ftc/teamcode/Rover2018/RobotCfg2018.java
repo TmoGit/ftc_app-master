@@ -42,9 +42,9 @@ import ftc.evlib.util.StepTimer;
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
 /**
- * This file was made by the electronVolts, FTC team 7393
- *  * Date Created: 9/2/17
- */
+ * This file was made by Cut The Red Wire, FTC team 6078
+ *  * Date Created: 11-10-18
+ *  */
 
 public class RobotCfg2018 extends RobotCfg {
     private final MecanumControl mecanumControl;
@@ -52,18 +52,18 @@ public class RobotCfg2018 extends RobotCfg {
     private static final Velocity MAX_ROBOT_SPEED_SIDEWAYS = new Velocity(Distance.fromInches(21.2441207039), Time.fromSeconds(1));
 
 
-    private final Servos servos;
-    private static final String GYRO_SENSOR_NAME = "gyro";
-    private static final String COLOR_SENSOR_NAME = "sensor_color";
-    private final ColorSensor colorSensor;
-    private final SpikeDetector rightLineSensor, leftLineSensor;
-    private static final String RIGHT_LINE_SENSOR_NAME = "l1";
-    private static final String LEFT_LINE_SENSOR_NAME = "l2";
-    private static final double LINE_SENSOR_SPIKE_THRESHOLD = 1.05; //1.1; //1.25;
+  //  private final Servos servos;
+   // private static final String GYRO_SENSOR_NAME = "gyro";
+    //private static final String COLOR_SENSOR_NAME = "sensor_color";
+   // private final ColorSensor colorSensor;
+ //   private final SpikeDetector rightLineSensor, leftLineSensor;
+  //  private static final String RIGHT_LINE_SENSOR_NAME = "l1";
+   // private static final String LEFT_LINE_SENSOR_NAME = "l2";
+  //  private static final double LINE_SENSOR_SPIKE_THRESHOLD = 1.05; //1.1; //1.25;
 
-    private static final int LINE_SENSOR_LONG_READINGS = 50;
-    private static final int LINE_SENSOR_SHORT_READINGS = 3;
-    private final List<Logger.Column> loggerColumns;
+  //  private static final int LINE_SENSOR_LONG_READINGS = 50;
+ ///  private static final int LINE_SENSOR_SHORT_READINGS = 3;
+    //private final List<Logger.Column> loggerColumns;
 
     //Defining Motors
     public DcMotor Motor_ArmBase = null;
@@ -85,13 +85,13 @@ public class RobotCfg2018 extends RobotCfg {
     public enum LeftReleaseServoPresets{
         OPENED,
         CLOSED,
-        GRAB,
+      //  GRAB,
 
     }
     public enum RightReleaseServoPresets{
         OPENED,
         CLOSED,
-        GRAB,
+     //   GRAB,
 
     }
     public enum SensorServoPresets{
@@ -100,13 +100,14 @@ public class RobotCfg2018 extends RobotCfg {
     }
     public enum relicServoPresets{
         OPEN,
-        GRAB
+  //      GRAB
     }
     public enum MainServoName implements ServoName{
-        LEFTRELEASE("s0",LeftReleaseServoPresets.values()),
-        RIGHTRELEASE("s2",RightReleaseServoPresets.values()),
-        SENSOR("s1",SensorServoPresets.values()),
-        GRAB("grab",relicServoPresets.values());
+   //     LEFTRELEASE("s0",LeftReleaseServoPresets.values()),
+      //  RIGHTRELEASE("s2",RightReleaseServoPresets.values()),
+     //  SENSOR("s1",SensorServoPresets.values()),
+      //  GRAB("grab",relicServoPresets.values());
+        ;
         private final String hardwareName;
         private final Enum[] presets;
 
@@ -137,9 +138,9 @@ public class RobotCfg2018 extends RobotCfg {
 
     public RobotCfg2018(HardwareMap hardwareMap, Map<ServoName, Enum> servoStartPresetMap) {
         super(hardwareMap);
-        colorSensor = hardwareMap.colorSensor.get(COLOR_SENSOR_NAME);
+        //colorSensor = hardwareMap.colorSensor.get(COLOR_SENSOR_NAME);
 
-        servos=new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
+     //   servos=new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
 
         //This is where we intilize the motors
 
@@ -173,12 +174,12 @@ public class RobotCfg2018 extends RobotCfg {
         double scaleFactor = 1.0; // optionsFile.get("mratio",Double.class);
 
 
-        leftLineSensor = Sensors.spikeDetector(hardwareMap, LEFT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
-        rightLineSensor = Sensors.spikeDetector(hardwareMap, RIGHT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
+      //  leftLineSensor = Sensors.spikeDetector(hardwareMap, LEFT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
+       // rightLineSensor = Sensors.spikeDetector(hardwareMap, RIGHT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
 
 
         //Motors setup
-        ServoControl colorServo = getServo(MainServoName.SENSOR);
+        //ServoControl colorServo = getServo(MainServoName.SENSOR);
         mecanumControl = new MecanumControl(new MecanumMotors(
                 Motors.withEncoder(Motor_WheelFL, true, true, stoppers),
                 Motors.withEncoder(Motor_WheelFR, false, true, stoppers),
@@ -187,7 +188,7 @@ public class RobotCfg2018 extends RobotCfg {
                 true, MAX_ROBOT_SPEED,MAX_ROBOT_SPEED_SIDEWAYS));
 
 
-
+/*
         loggerColumns = ImmutableList.of(
                 //robot motion
                 new Logger.Column("velocityX", new InputExtractor<Double>() {
@@ -217,16 +218,15 @@ public class RobotCfg2018 extends RobotCfg {
 
 
                 //servos
-                new Logger.Column("LEFTRELEASE", getServos().servoIE(MainServoName.LEFTRELEASE)),
-                new Logger.Column("RIGHTRELEASE", getServos().servoIE(MainServoName.RIGHTRELEASE)),
-                new Logger.Column("SENSOR", getServos().servoIE(MainServoName.SENSOR)),
+              //  new Logger.Column("LEFTRELEASE", getServos().servoIE(MainServoName.LEFTRELEASE)),
+               // new Logger.Column("RIGHTRELEASE", getServos().servoIE(MainServoName.RIGHTRELEASE)),
+            //    new Logger.Column("SENSOR", getServos().servoIE(MainServoName.SENSOR)),
 
 //                new Logger.Column("distanceSensor", InputExtractors.format("%10f", distanceSensor)),
 
                 //shooter
 //                new Logger.Column("shooterSwitchInv", InputExtractors.booleanToIntIE(shooterSwitchInv)),
 //                new Logger.Column("shooterSwitchBoth", InputExtractors.booleanToIntIE(shooterSwitchBoth)),
-
 
 
                 //sensors
@@ -271,7 +271,7 @@ public class RobotCfg2018 extends RobotCfg {
                     }
                 }));
 
-
+*/
 //
 //
 
@@ -280,18 +280,18 @@ public class RobotCfg2018 extends RobotCfg {
 
 
 }
-    public Servos getServos() {
-        return servos;
-    }
+  //  public Servos getServos() {
+   //     return servos;
+   // }
 
     public MecanumControl getMecanumControl() {
         return mecanumControl;
     }
-    public SpikeDetector getRightLineSensor() {
-        return rightLineSensor;
-    }
+   // public SpikeDetector getRightLineSensor() {
+    //    return rightLineSensor;
+    //}
 
-    public SpikeDetector getLeftLineSensor() {return leftLineSensor;}
+   // public SpikeDetector getLeftLineSensor() {return leftLineSensor;}
 
 
 
@@ -306,12 +306,12 @@ public class RobotCfg2018 extends RobotCfg {
 
         stepTimer.start();
         stepTimer.step("line sensors");
-        leftLineSensor.act();
-        rightLineSensor.act();
+      // leftLineSensor.act();
+       // rightLineSensor.act();
         stepTimer.step("mecanumControl");
         mecanumControl.act();
         //stepTimer.step("gyro");
-        stepTimer.step("grabber");
+      //  stepTimer.step("grabber");
 
 
         stepTimer.stop();

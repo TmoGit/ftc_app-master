@@ -23,7 +23,7 @@ import ftc.evlib.opmodes.AbstractTeleOp;
 
 
 /**
- * Created by ftc7393 on 11/24/2017.
+ * This file was made by Cut The Red Wire, FTC team 6078
  */
 @TeleOp(name = "TeleOp2018", group = "Official")
 public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
@@ -141,7 +141,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     @Override
     protected void go() {
         forwardControl();
-
+        Arm_Control();
     }
 
     @Override
