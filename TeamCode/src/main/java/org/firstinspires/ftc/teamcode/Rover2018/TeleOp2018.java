@@ -34,6 +34,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor Arm_rightY;
     ScalingInputExtractor Lift_leftY;
 
+    public double MOTOR_RUNSPEED = 0.5;
+
 
     class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
@@ -180,16 +182,26 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
 
 
-
-        if(driver1.right_bumper.justPressed()){
-            robotCfg.Motor_ArmBase.setPower(1);
+        //Arm control
+        if(driver2.right_bumper.isPressed()){
+            robotCfg.Motor_ArmBase.setPower(MOTOR_RUNSPEED);
             telemetry.addData("Lift Movement ", "UP");
             telemetry.update();
         }
-        if(driver1.left_bumper.justPressed()){
-            robotCfg.Motor_ArmBase.setPower(-1);
+        if(driver2.left_bumper.isPressed()){
+            robotCfg.Motor_ArmBase.setPower(-MOTOR_RUNSPEED);
             telemetry.addData("Lift Movement ", "DOWN");
             telemetry.update();
+        }
+
+        //Lift Control
+        if(driver2.dpad_up.isPressed()) {
+            robotCfg.Motor_LiftLeft.setPower(MOTOR_RUNSPEED);
+            robotCfg.Motor_LiftRight.setPower(-MOTOR_RUNSPEED);
+        }
+        if(driver2.dpad_down.isPressed()) {
+            robotCfg.Motor_LiftLeft.setPower(-MOTOR_RUNSPEED);
+            robotCfg.Motor_LiftRight.setPower(MOTOR_RUNSPEED);
         }
 
         if(driver1.dpad_up.isPressed() && !driver1.dpad_right.isPressed() && !driver1.dpad_left.isPressed()){

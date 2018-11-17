@@ -152,6 +152,8 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
 
+
+
        // Motor_ArmBase.setPower(0.0);
         Motor_ArmBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
