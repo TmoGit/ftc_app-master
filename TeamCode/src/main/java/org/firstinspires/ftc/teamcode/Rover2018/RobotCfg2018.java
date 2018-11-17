@@ -52,7 +52,7 @@ public class RobotCfg2018 extends RobotCfg {
     private static final Velocity MAX_ROBOT_SPEED_SIDEWAYS = new Velocity(Distance.fromInches(21.2441207039), Time.fromSeconds(1));
 
 
-  //  private final Servos servos;
+   // private final Servos servos;
    // private static final String GYRO_SENSOR_NAME = "gyro";
     //private static final String COLOR_SENSOR_NAME = "sensor_color";
    // private final ColorSensor colorSensor;
@@ -82,6 +82,19 @@ public class RobotCfg2018 extends RobotCfg {
 //        this(hardwareMap, ServoCfg.defaultServoStartPresetMap(MainServoName.values()));
 //    }
 
+    public enum LiftDumpServoPresets{
+        UP,
+        DOWN,
+    }
+    public enum RightIntakeServoPresets{
+        FORWARD,
+        BACKWARD,
+    }
+    public enum LeftIntakeServoPresets{
+        FORWARD,
+        BACKWARD,
+    }
+/*
     public enum LeftReleaseServoPresets{
         OPENED,
         CLOSED,
@@ -102,7 +115,12 @@ public class RobotCfg2018 extends RobotCfg {
         OPEN,
   //      GRAB
     }
+    */
     public enum MainServoName implements ServoName{
+        LIFTDUMP("Servo_Lift",LiftDumpServoPresets.values()),
+        RIGHTINTAKE("Servo_ArmRight",RightIntakeServoPresets.values()),
+        LEFTINTAKE("Servo_ArmLeft",LeftIntakeServoPresets.values()),
+
    //     LEFTRELEASE("s0",LeftReleaseServoPresets.values()),
       //  RIGHTRELEASE("s2",RightReleaseServoPresets.values()),
      //  SENSOR("s1",SensorServoPresets.values()),
