@@ -29,7 +29,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import ftc.evlib.hardware.motors.Motors;
 import ftc.evlib.hardware.sensors.Sensors;
 import ftc.evlib.hardware.sensors.SpikeDetector;
-import ftc.evlib.hardware.servos.ServoCfg;
+//import ftc.evlib.hardware.servos.ServoCfg;
+import com.qualcomm.robotcore.hardware.Servo;
 import ftc.evlib.hardware.servos.ServoControl;
 import ftc.evlib.hardware.servos.ServoName;
 import ftc.evlib.hardware.servos.Servos;
@@ -73,6 +74,15 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelFR = null;
     public DcMotor Motor_WheelBL = null;
     public DcMotor Motor_WheelBR = null;
+
+    //Defining Servos
+    public Servo Servo_InL = null;
+    public Servo Servo_InR = null;
+    public Servo Servo_Out = null;
+
+    public static final double OutUpPos       =  0.0 ;
+    public static final double OutDumpPos    =  0.45 ;
+    public static final double ARM_DOWN_POWER  = -0.45 ;
 
 
 
@@ -149,9 +159,9 @@ public class RobotCfg2018 extends RobotCfg {
             return RobotCfg2018.class;
         }
     }
-    public RobotCfg2018(HardwareMap hardwareMap){
-        this(hardwareMap, ServoCfg.defaultServoStartPresetMap(MainServoName.values()));
-    }
+    //public RobotCfg2018(HardwareMap hardwareMap){
+        //this(hardwareMap, ServoCfg.defaultServoStartPresetMap(MainServoName.values()));
+   // }
 
 
     public RobotCfg2018(HardwareMap hardwareMap, Map<ServoName, Enum> servoStartPresetMap) {
@@ -170,6 +180,9 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
 
+        Servo_InL = hardwareMap.get(Servo.class, "Servo_InL");
+        Servo_InR = hardwareMap.get(Servo.class, "Servo_InR");
+        Servo_Out = hardwareMap.get(Servo.class, "Servo_Out");
 
 
        // Motor_ArmBase.setPower(0.0);

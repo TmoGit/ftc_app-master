@@ -6,6 +6,7 @@ import com.google.common.io.BaseEncoding;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.robot.Robot;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Rover2018.RobotCfg2018;
 
@@ -35,6 +36,12 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor Lift_leftY;
 
     public double MOTOR_RUNSPEED = 0.5;
+    public double LSWEEPER_POWER = 0.0;
+    public double RSWEEPER_POWER = 0.0;
+
+    //General Variable Declaration
+    short controlState = 2, stepCounter = 0;
+
 
 
     class ScalingInputExtractor implements InputExtractor<Double> {
@@ -72,8 +79,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
   @Override
   protected RobotCfg2018 createRobotCfg() {
-  RobotCfg2018 robot  = new RobotCfg2018(hardwareMap);
-      return robot;
+     RobotCfg2018 robot = null; // = new RobotCfg2018(hardwareMap);
+     return robot;
    }
 
 
@@ -127,34 +134,91 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
 
 
-        Arm_Control();
-        Lift_Control();
+        //Arm_Control();
+        //Lift_Control();
     }
 
-    private void Arm_Control()
+    private void Bump_Timer()
     {
 
+
+    }
+
+    private void Sequencer()
+    {
+
+    }
+
+
+    private boolean Reset()
+    {
+        Arm_Control(0);
+        Lift_Control(0);
+
+
+
+        return true;
+    }
+
+
+
+    private void Arm_Control(double power)
+    {
+        robotCfg.Motor_ArmBase.setPower(power);
+/*
         double f = currentSpeedFactor.getFactor();
         Arm_rightY = new ScalingInputExtractor(driver2.left_stick_y, f);
         robotCfg.Motor_ArmBase.setPower(Arm_rightY.getValue());
 
         telemetry.addData("Arm Movement: ", Arm_rightY.getValue());
         telemetry.update();
-
+*/
     }
 
-    private void Lift_Control()
+    private void Lift_Control(double power)
     {
 
-        double f = currentSpeedFactor.getFactor();
+        robotCfg.Motor_LiftRight.setPower(-power);
+        robotCfg.Motor_LiftLeft.setPower(power);
+
+ /*       double f = currentSpeedFactor.getFactor();
         Lift_leftY = new ScalingInputExtractor(driver2.right_stick_y, f);
         robotCfg.Motor_LiftLeft.setPower(Lift_leftY.getValue());
         robotCfg.Motor_LiftLeft.setPower(-Lift_leftY.getValue());
 
         telemetry.addData("Lift Movement: ", Lift_leftY.getValue());
         telemetry.update();
-
+*/
     }
+
+    private void Bucket_Control(String pos)
+    {
+        double dumpPos = 0.5, upPos = 0.0, bucketPos = upPos;
+
+
+        if (pos == "DUMP") {
+            bucketPos = Range.clip(dumpPos, upPos, dumpPos);
+        }
+        else if (pos == "UP") {
+            bucketPos = Range.clip(upPos, upPos, dumpPos);
+        }
+
+        robotCfg.Servo_Out.setPosition(bucketPos);
+    }
+
+    private void Sweeper_Control(double leftPower, double rightPower)
+    {
+        double lPos = robotCfg.Servo_InL.getPosition() + leftPower;
+        double rPos = robotCfg.Servo_InR.getPosition() + rightPower;
+
+
+
+        //robotCfg.Servo_InR.setDirection();
+
+        robotCfg.Servo_InL.setPosition(lPos);
+        robotCfg.Servo_InR.setPosition(rPos);
+    }
+
 
     @Override
     protected void go() {
@@ -167,7 +231,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
 
 
-        if(driver1.a.justPressed()) {
+        /*if(driver1.a.justPressed()) {
             if (currentSpeedFactor == MotorSpeedFactor.FAST) {
                 currentSpeedFactor = MotorSpeedFactor.SLOW;
             } else {
@@ -177,32 +241,82 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             leftX.setFactor(f);
             rightY.setFactor(f);
             rightX.setFactor(f);
-        }
+        }*/
 
 
 
 
         //Arm control
         if(driver2.right_bumper.isPressed()){
-            robotCfg.Motor_ArmBase.setPower(MOTOR_RUNSPEED);
-            telemetry.addData("Lift Movement ", "UP");
+            Arm_Control(MOTOR_RUNSPEED);
+            telemetry.addData("Arm Movement ", "UP");
             telemetry.update();
         }
-        if(driver2.left_bumper.isPressed()){
-            robotCfg.Motor_ArmBase.setPower(-MOTOR_RUNSPEED);
-            telemetry.addData("Lift Movement ", "DOWN");
+        else if(driver2.left_bumper.isPressed()){
+            Arm_Control(-MOTOR_RUNSPEED);
+            telemetry.addData("Arm Movement ", "DOWN");
             telemetry.update();
+        }
+        else {
+            Arm_Control(0.0);
         }
 
         //Lift Control
         if(driver2.dpad_up.isPressed()) {
-            robotCfg.Motor_LiftLeft.setPower(MOTOR_RUNSPEED);
-            robotCfg.Motor_LiftRight.setPower(-MOTOR_RUNSPEED);
+            Lift_Control(MOTOR_RUNSPEED);
+            telemetry.addData("Lift Movement ", "Up");
+            telemetry.update();
         }
-        if(driver2.dpad_down.isPressed()) {
-            robotCfg.Motor_LiftLeft.setPower(-MOTOR_RUNSPEED);
-            robotCfg.Motor_LiftRight.setPower(MOTOR_RUNSPEED);
+        else if(driver2.dpad_down.isPressed()) {
+            Lift_Control(-MOTOR_RUNSPEED);
+            telemetry.addData("Lift Movement ", "DOWN");
+            telemetry.update();
         }
+        else {
+            Lift_Control(0.0);
+        }
+
+        //Bucket Control
+        if(driver2.right_bumper.isPressed()){
+            Bucket_Control("UP");
+        }
+
+        if(driver2.left_bumper.isPressed()){
+            Bucket_Control("DUMP");
+        }
+
+        //Sweeper Control
+        if(driver2.left_stick_y.getRawValue() >= 10){
+            LSWEEPER_POWER =  1;
+        }
+        else if(driver2.left_stick_y.getRawValue() <= -10){
+            LSWEEPER_POWER = -1;
+        }
+        else{
+            LSWEEPER_POWER =  0;
+        }
+
+
+        if(driver2.right_stick_y.getRawValue() >= 10){
+            RSWEEPER_POWER =  1;
+        }
+        else if(driver2.right_stick_y.getRawValue() <= -10){
+            RSWEEPER_POWER = -1;
+        }
+        else{
+            RSWEEPER_POWER =  0;
+        }
+
+        Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
+
+        telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
+        telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
+        telemetry.addData("\nLeft Servo Pos", robotCfg.Servo_InL.getPosition());
+        telemetry.addData("\nRight Servo Pos", robotCfg.Servo_InR.getPosition());
+        telemetry.addData("\nLeft Servo Dir", robotCfg.Servo_InL.getDirection());
+        telemetry.addData("\nRight Servo Dir", robotCfg.Servo_InR.getDirection());
+        telemetry.update();
+
 
         if(driver1.dpad_up.isPressed() && !driver1.dpad_right.isPressed() && !driver1.dpad_left.isPressed()){
 
@@ -218,9 +332,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 
 
-        if(driver2.right_bumper.isPressed()){
 
-        }
 
 
 

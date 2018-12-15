@@ -79,15 +79,15 @@ public abstract class RobotCfg {
     }
 
     //this does not need to be overridden
-    public ServoControl getServo(ServoName servoName) {
-        return getServos().getServoMap().get(servoName);
-    }
+    //public ServoControl getServo(ServoName servoName) {
+   //     return getServos().getServoMap().get(servoName);
+    //}
 
     //empty Servos object
-    private static final Servos EMPTY_SERVOS = new Servos(new HashMap<ServoName, ServoControl>());
+    //private static final Servos EMPTY_SERVOS = new Servos(new HashMap<ServoName, ServoControl>());
 
     //this should be overridden to return your robot's servos
-    public Servos getServos() {
+   // public Servos getServos() {
         return EMPTY_SERVOS;
     }
 
