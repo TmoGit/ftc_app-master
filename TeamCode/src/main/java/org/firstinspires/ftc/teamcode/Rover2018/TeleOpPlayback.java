@@ -31,7 +31,7 @@ public class TeleOpPlayback extends TeleOp2018 {
     protected void setup() {
         super.setup();
 
-        OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile(org.firstinspires.ftc.teamcode.relic2017.TeleOpPlaybackOptions.FILENAME));
+      /* OptionsFile optionsFile = new OptionsFile(EVConverters.getInstance(), FileUtil.getOptionsFile(org.firstinspires.ftc.teamcode.Rover2018.TeleOpPlaybackOptions.FILENAME));
         File file = new File(optionsFile.get(org.firstinspires.ftc.teamcode.relic2017.TeleOpPlaybackOptions.filepathTag, String.class));
 
         endOfFile = true;
@@ -85,5 +85,8 @@ public class TeleOpPlayback extends TeleOp2018 {
             }
             super.act();
         }
+        */
     }
+
+
 }

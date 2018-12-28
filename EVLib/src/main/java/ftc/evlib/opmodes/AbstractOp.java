@@ -27,7 +27,7 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     /**
      * coordinates all the servos to act with one command
      */
-    public Servos servos;
+  //  public Servos servos;
 
     /**
      * logs values to a file
@@ -112,7 +112,7 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
         Telem.telemetry = telemetry; //store the telemetry in a global location
 
         robotCfg = createRobotCfg(); //ask the OpMode for the HardwareCfg object
-        servos = robotCfg.getServos(); //create the servos object
+     //   servos = robotCfg.getServos(); //create the servos object
 
         matchTimer = new MatchTimer(getMatchTime()); //create the MatchTimer
         logger = createLogger(); //create the logger
@@ -123,7 +123,7 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     @Override
     public void init_loop() {
         setup_act();
-        servos.act();
+        //servos.act();
     }
 
     @Override
@@ -158,14 +158,14 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
         post_act();
 
         robotCfg.act();
-        servos.act(); //update the servo positions
+        //servos.act(); //update the servo positions
     }
 
     @Override
     public void stop() {
         robotCfg.stop();
         robotCfg.getStoppers().stop();
-        servos.act(); //update the servos so they will stop
+      //  servos.act(); //update the servos so they will stop
         if (logger != null) logger.stop();
 
         end();

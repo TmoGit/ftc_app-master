@@ -88,8 +88,8 @@ public abstract class RobotCfg {
 
     //this should be overridden to return your robot's servos
    // public Servos getServos() {
-        return EMPTY_SERVOS;
-    }
+
+
 
     //init(), act() and stop() will be called during the opmode
 

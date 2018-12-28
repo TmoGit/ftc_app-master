@@ -125,12 +125,12 @@ public abstract class AbstractServoTuneOp extends ftc.evlib.opmodes.AbstractTele
     @Override
     protected void setup() {
         //get a list of servo names from the RobotCfg
-        servoNames = robotCfg.getServos().getServoNames();
+     //   servoNames = robotCfg.getServos().getServoNames();
 
         //add servo positions to be the same length as servoNames
-        for (ServoName ignored : servoNames) {
-            servoPositions.add(0.5);
-        }
+      //  for (ServoName ignored : servoNames) {
+        //    servoPositions.add(0.5);
+       // }
     }
 
     @Override
@@ -167,7 +167,7 @@ public abstract class AbstractServoTuneOp extends ftc.evlib.opmodes.AbstractTele
         if (servoIndexChanged) {
             servoIndexChanged = false;
 
-            servo = robotCfg.getServo(servoNames.get(servoIndex));//get the servo
+          //  servo = robotCfg.getServo(servoNames.get(servoIndex));//get the servo
             presetNames = new ArrayList<>(servo.getPresets().keySet()); //get the preset names from the servo
             presetValues = new ArrayList<>(servo.getPresets().values()); //get the presets from the servo
 

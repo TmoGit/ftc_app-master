@@ -207,8 +207,8 @@ public class RobotCfg2018 extends RobotCfg {
         double scaleFactor = 1.0; // optionsFile.get("mratio",Double.class);
 
 
-      //  leftLineSensor = Sensors.spikeDetector(hardwareMap, LEFT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
-       // rightLineSensor = Sensors.spikeDetector(hardwareMap, RIGHT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
+        //  leftLineSensor = Sensors.spikeDetector(hardwareMap, LEFT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
+        // rightLineSensor = Sensors.spikeDetector(hardwareMap, RIGHT_LINE_SENSOR_NAME, LINE_SENSOR_SPIKE_THRESHOLD, LINE_SENSOR_LONG_READINGS, LINE_SENSOR_SHORT_READINGS);
 
 
         //Motors setup
