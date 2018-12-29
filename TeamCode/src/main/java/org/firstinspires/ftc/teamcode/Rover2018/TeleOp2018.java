@@ -1,14 +1,23 @@
 package org.firstinspires.ftc.teamcode.Rover2018;
 
 
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.robot.Robot;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+
 
 import org.firstinspires.ftc.teamcode.Rover2018.RobotCfg2018;
+
+import java.security.KeyStore;
+import java.util.concurrent.TimeUnit;
 
 import ftc.electronvolts.util.Function;
 import ftc.electronvolts.util.Functions;
@@ -35,14 +44,33 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor Arm_rightY;
     ScalingInputExtractor Lift_leftY;
 
+    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    static final double     DRIVE_SPEED             = 0.6;
+    static final double     TURN_SPEED              = 0.5;
+
     public double MOTOR_RUNSPEED = 0.5;
     public double LSWEEPER_POWER = 0.0;
     public double RSWEEPER_POWER = 0.0;
+    public double LIFT_POSITION = 8.0;
+    public double ARM_NEUTRAL_POSITION = 2.5;
+    public double ARM_CAPTURE_POSITION = 4.0;
 
     double lPos = 0.0;
     double rPos = 0.0;
 
-    short constrolState =2, stepCounter =0;
+   // short constrolState =2, stepCounter =0;
+    int controlState = 0;
+    int SequencerStepsMax = 6;
+
+    int Current_Seq_Step = 0;
+    boolean[] boolStep_Confirm = new boolean[SequencerStepsMax];
+    boolean SequencerIsActive = false;
+    boolean SequencerIsComplete = false;
+
+    private ElapsedTime runtime = new ElapsedTime();
 
     class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
@@ -137,25 +165,85 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
        // Arm_Control();
       //  Lift_Control();
     }
-    private void Bump_Timer(){
+    private void Bump_Timer(int timeout){
+        try{
+            TimeUnit.SECONDS.sleep(timeout);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void Sequencer(int step_advance, boolean Status){
+        if (Current_Seq_Step != SequencerStepsMax){
+            SequencerIsComplete = true;
+        }
+        if (Current_Seq_Step == SequencerStepsMax+1){
+            SequencerIsComplete = false;
+            Current_Seq_Step =0;
+            for (int i=0; i>SequencerStepsMax; i++){
+                boolStep_Confirm[i] = false;
+            }
+            runtime.reset();
+        }
+        if (Status == true){
+            SequencerIsActive = true;
+        }
+        if (Status == false){
+            SequencerIsActive = false;
+
+        }
+        Current_Seq_Step = Current_Seq_Step + step_advance;
+        Bump_Timer(5);
+
 
     }
 
-    private void Sequence(){
+    private boolean Reset() {
+
+        Arm_Control(-0.5, -ARM_NEUTRAL_POSITION);
+        Bump_Timer(5);
 
 
-    }
+        Lift_Control(-0.5,-LIFT_POSITION);
+        Bump_Timer(5);
 
-    private boolean Reset(){
-        Arm_Control(0);
-        Lift_Control(0);
+        Bucket_Control("UP");
+        Bump_Timer(5);
+
         return true;
     }
 
 
-    private void Arm_Control(double power)
+    private void Arm_Control(double power, double inchDist)
     {
-        robotCfg.Motor_ArmBase.setPower(power);
+        if (controlState == 0) {
+            robotCfg.Motor_ArmBase.setPower(power);
+
+        }
+
+        if (controlState == 1){
+            int newArmTarget = 0;
+
+                newArmTarget = robotCfg.Motor_ArmBase.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+
+
+            robotCfg.Motor_ArmBase.setTargetPosition(newArmTarget);
+
+            // Turn On RUN_TO_POSITION
+            robotCfg.Motor_ArmBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Move to position
+            while (robotCfg.Motor_ArmBase.getCurrentPosition() != newArmTarget){
+                robotCfg.Motor_ArmBase.setPower(power);
+            }
+            if (robotCfg.Motor_ArmBase.getCurrentPosition() >= newArmTarget) {
+                robotCfg.Motor_ArmBase.setPower(0);
+                boolStep_Confirm[Current_Seq_Step] = true;
+            }
+        }
+
+
+
         /*
         double f = currentSpeedFactor.getFactor();
 
@@ -168,11 +256,40 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     }
 
-    private void Lift_Control(double power)
+    private void Lift_Control(double power, double inchDist)
     {
-        robotCfg.Motor_LiftRight.setPower(-power);
-        robotCfg.Motor_LiftLeft.setPower(power);
+        if (controlState == 0) {
+            robotCfg.Motor_LiftRight.setPower(-power);
+            robotCfg.Motor_LiftLeft.setPower(power);
+        }
 
+        if (controlState == 1) {
+            int newLiftLeftTarget =0;
+            int newLiftRightTarget =0;
+
+                newLiftLeftTarget = robotCfg.Motor_LiftLeft.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+                newLiftRightTarget = robotCfg.Motor_LiftRight.getCurrentPosition() + (int) (-inchDist * COUNTS_PER_INCH);
+
+
+            robotCfg.Motor_LiftLeft.setTargetPosition(newLiftLeftTarget);
+            robotCfg.Motor_LiftRight.setTargetPosition(newLiftRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            robotCfg.Motor_LiftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robotCfg.Motor_LiftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Move to position
+            while (robotCfg.Motor_LiftLeft.getCurrentPosition() != newLiftLeftTarget  && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget ){
+                robotCfg.Motor_LiftLeft.setPower(power);
+                robotCfg.Motor_LiftRight.setPower(-power);
+            }
+            if (robotCfg.Motor_LiftLeft.getCurrentPosition() >= newLiftLeftTarget && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget) {
+                robotCfg.Motor_LiftRight.setPower(0);
+                robotCfg.Motor_LiftLeft.setPower(0);
+                boolStep_Confirm[Current_Seq_Step] = true;
+            }
+
+        }
         /*
         double f = currentSpeedFactor.getFactor();
         Lift_leftY = new ScalingInputExtractor(driver2.right_stick_y, f);
@@ -183,6 +300,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         telemetry.update();
        */
     }
+
+
     private void Bucket_Control(String pos)
     {
         double dumpPos = 0.5, upPos = 0.0, bucketPos = upPos;
@@ -210,6 +329,56 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
      //   robotCfg.Servo_InL.setPosition(lPos);
      //   robotCfg.Servo_InR.setPosition(rPos);
     }
+
+    private void Dump_Auto_Seq(String status) {
+
+        if (status == "enable") {
+
+            if (Current_Seq_Step == 0) {
+                //Setup
+                if (Reset() == true) {
+                    Sequencer(1, true);
+                } else {
+                    for (int i = 0; i < 3; i++) {
+                        if (Reset() == true) {
+                            Sequencer(1, true);
+                        }
+                    }
+                    //Generate error
+                }
+            }
+
+
+            if (Current_Seq_Step == 1 && boolStep_Confirm[0] == true) {
+
+                Arm_Control(MOTOR_RUNSPEED, ARM_CAPTURE_POSITION);
+                Sequencer(1, true);
+            }
+            if (Current_Seq_Step == 2 && boolStep_Confirm[1] == true) {
+                // Sweeper spin back
+
+                Sequencer(1, true);
+            }
+            if (Current_Seq_Step == 3 && boolStep_Confirm[2] == true) {
+                Arm_Control(-MOTOR_RUNSPEED, -ARM_NEUTRAL_POSITION);
+                Sequencer(1, true);
+            }
+            if (Current_Seq_Step == 4 && boolStep_Confirm[3] == true) {
+                Lift_Control(MOTOR_RUNSPEED, LIFT_POSITION);
+                Sequencer(1, true);
+            }
+            if (Current_Seq_Step == 5 && boolStep_Confirm[4] == true) {
+
+                Sequencer(1, false);
+            }
+        }
+        if (status == "disable"){
+            ///
+
+        }
+
+        }
+
     @Override
     protected void go() {
         forwardControl();
@@ -234,37 +403,44 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 */
 
+        if(driver2.y.isPressed()){
+            Dump_Auto_Seq("enable");
+            controlState = 1;
+        }
 
-
+        if(driver2.x.isPressed()){
+            Dump_Auto_Seq("disable");
+            controlState = 0;
+        }
 
         //Arm control
         if(driver2.right_bumper.isPressed()){
-            Arm_Control(MOTOR_RUNSPEED);
+            Arm_Control(MOTOR_RUNSPEED,0);
             telemetry.addData("Arm Movement ", "UP");
             telemetry.update();
         }
         else if(driver2.left_bumper.isPressed()){
-            Arm_Control(-MOTOR_RUNSPEED);
+            Arm_Control(-MOTOR_RUNSPEED,0);
             telemetry.addData("Arm Movement ", "DOWN");
             telemetry.update();
         }
         else {
-            Arm_Control(0.0);
+            Arm_Control(0.0,0);
         }
 
         //Lift Control
         if(driver2.dpad_up.isPressed()) {
-            Lift_Control(MOTOR_RUNSPEED);
+            Lift_Control(MOTOR_RUNSPEED,0);
             telemetry.addData("Lift Movement ", "Up");
             telemetry.update();
         }
         else if(driver2.dpad_down.isPressed()) {
-            Lift_Control(-MOTOR_RUNSPEED);
+            Lift_Control(-MOTOR_RUNSPEED,0);
             telemetry.addData("Lift Movement ", "DOWN");
             telemetry.update();
         }
         else {
-            Lift_Control(0.0);
+            Lift_Control(0.0,0);
         }
 
         //Bucket Control
@@ -327,6 +503,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
 
     }
+
 
     @Override
     protected void end() {

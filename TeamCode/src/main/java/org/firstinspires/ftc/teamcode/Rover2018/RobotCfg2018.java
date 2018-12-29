@@ -53,6 +53,7 @@ public class RobotCfg2018 extends RobotCfg {
     private static final Velocity MAX_ROBOT_SPEED_SIDEWAYS = new Velocity(Distance.fromInches(21.2441207039), Time.fromSeconds(1));
 
 
+
   //  private final Servos servos;
    // private static final String GYRO_SENSOR_NAME = "gyro";
     //private static final String COLOR_SENSOR_NAME = "sensor_color";
@@ -162,7 +163,23 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
 
        // Motor_ArmBase.setPower(0.0);
-        Motor_ArmBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //Reset Encoders
+        Motor_ArmBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_LiftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_LiftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Run using encoders
+        Motor_ArmBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_LiftLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_LiftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 //        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
