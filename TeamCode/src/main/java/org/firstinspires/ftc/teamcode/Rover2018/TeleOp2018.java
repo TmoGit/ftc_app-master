@@ -259,16 +259,16 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     private void Lift_Control(double power, double inchDist)
     {
         if (controlState == 0) {
-            robotCfg.Motor_LiftRight.setPower(-power);
-            robotCfg.Motor_LiftLeft.setPower(power);
+            robotCfg.Motor_LiftRight.setPower(power);
+            robotCfg.Motor_LiftLeft.setPower(-power);
         }
 
         if (controlState == 1) {
             int newLiftLeftTarget =0;
             int newLiftRightTarget =0;
 
-                newLiftLeftTarget = robotCfg.Motor_LiftLeft.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
-                newLiftRightTarget = robotCfg.Motor_LiftRight.getCurrentPosition() + (int) (-inchDist * COUNTS_PER_INCH);
+                newLiftLeftTarget = robotCfg.Motor_LiftLeft.getCurrentPosition() + (int) (-inchDist * COUNTS_PER_INCH);
+                newLiftRightTarget = robotCfg.Motor_LiftRight.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
 
 
             robotCfg.Motor_LiftLeft.setTargetPosition(newLiftLeftTarget);
@@ -444,31 +444,31 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 
         //Bucket Control
-        if(driver2.right_bumper.isPressed()){
+        if(driver1.right_bumper.isPressed()){
             Bucket_Control("UP");
         }
 
-        if(driver2.left_bumper.isPressed()){
+        if(driver1.left_bumper.isPressed()){
             Bucket_Control("DUMP");
         }
 
         //Sweeper Control
-        if(driver2.left_stick_y.getRawValue() >= 10){
-            LSWEEPER_POWER =  1;
+        if(driver2.left_stick_y.getRawValue() >= 0.2){
+            LSWEEPER_POWER =  -1;
         }
-        else if(driver2.left_stick_y.getRawValue() <= -10){
-            LSWEEPER_POWER = -1;
+        else if(driver2.left_stick_y.getRawValue() <= -0.2){
+            LSWEEPER_POWER = 1;
         }
         else{
             LSWEEPER_POWER =  0;
         }
 
 
-        if(driver2.right_stick_y.getRawValue() >= 10){
-            RSWEEPER_POWER =  1;
+        if(driver2.right_stick_y.getRawValue() >= 0.2){
+            RSWEEPER_POWER =  -1;
         }
-        else if(driver2.right_stick_y.getRawValue() <= -10){
-            RSWEEPER_POWER = -1;
+        else if(driver2.right_stick_y.getRawValue() <= -0.2){
+            RSWEEPER_POWER = 1;
         }
         else{
             RSWEEPER_POWER =  0;
