@@ -64,6 +64,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
    // short constrolState =2, stepCounter =0;
     int controlState = 0;
     int SequencerStepsMax = 6;
+    int Step_Bump = 5000;
 
     int Current_Seq_Step = 0;
     boolean[] boolStep_Confirm = new boolean[SequencerStepsMax];
@@ -89,6 +90,23 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     }
     private MotorSpeedFactor currentSpeedFactor = MotorSpeedFactor.FAST;
 
+    public static void sleep(long sleepTime)
+    {
+        long wakeupTime = System.currentTimeMillis() + sleepTime;
+
+        while (sleepTime > 0)
+        {
+            try
+            {
+                Thread.sleep(sleepTime);
+            }
+            catch (InterruptedException e)
+            {
+                sleepTime = wakeupTime - System.currentTimeMillis();
+            }
+        }
+    }
+
     enum MotorSpeedFactor {
         FAST(1.0), SLOW(0.5);
         private double factor;
@@ -112,31 +130,11 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
    }
 
 
-
-
     @Override
     protected Logger createLogger() {
         //log the gamepads, and the motors, sensors, servos, etc. from MainRobotCfg
         return new Logger("", "teleop.csv", new ImmutableList.Builder<Logger.Column>()
-//                .add(
-//                new Logger.Column("state", new InputExtractor<StateName>() {
-//                    @Override
-//                    public StateName getValue() {
-//                        return stateMachine.getCurrentStateName();
-//                    }
-//                }))
-                //.add(
- //                       new Logger.Column(TeleOpPlayback.GAMEPAD_2_TITLE, new InputExtractor<String>() {
- //                           @Override
- //                           public String getValue() {
- //                               try {
- //                                   return BaseEncoding.base64Url().encode(gamepad2.toByteArray());
- //                               } catch (RobotCoreException e) {
-  //                                  e.printStackTrace();
-  //                                  return "";
-  //                              }
-   //                         }
-  //                      })
+
                 .build());
     }
 
@@ -161,24 +159,23 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
 
-
-       // Arm_Control();
-      //  Lift_Control();
     }
     private void Bump_Timer(int timeout){
-        try{
-            TimeUnit.SECONDS.sleep(timeout);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
+
+        sleep(timeout);
+//        try{
+//            TimeUnit.SECONDS.sleep(timeout);
+//        } catch (InterruptedException ex) {
+//            Thread.currentThread().interrupt();
+//        }
     }
 
     private void Sequencer(int step_advance, boolean Status){
         if (Current_Seq_Step != SequencerStepsMax){
-            SequencerIsComplete = true;
+            SequencerIsComplete = false;
         }
         if (Current_Seq_Step == SequencerStepsMax+1){
-            SequencerIsComplete = false;
+            SequencerIsComplete = true;
             Current_Seq_Step =0;
             for (int i=0; i>SequencerStepsMax; i++){
                 boolStep_Confirm[i] = false;
@@ -193,22 +190,22 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
         }
         Current_Seq_Step = Current_Seq_Step + step_advance;
-        Bump_Timer(5);
+        Bump_Timer(Step_Bump);
 
 
     }
 
     private boolean Reset() {
 
-        Arm_Control(-0.5, -ARM_NEUTRAL_POSITION);
-        Bump_Timer(5);
+        Arm_Control(-MOTOR_RUNSPEED, -ARM_NEUTRAL_POSITION);
+        Bump_Timer(5000);
 
 
-        Lift_Control(-0.5,-LIFT_POSITION);
-        Bump_Timer(5);
+        Lift_Control(-MOTOR_RUNSPEED,-LIFT_POSITION);
+        Bump_Timer(5000);
 
         Bucket_Control("UP");
-        Bump_Timer(5);
+        Bump_Timer(5000);
 
         return true;
     }
@@ -226,7 +223,6 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
                 newArmTarget = robotCfg.Motor_ArmBase.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
 
-
             robotCfg.Motor_ArmBase.setTargetPosition(newArmTarget);
 
             // Turn On RUN_TO_POSITION
@@ -243,16 +239,6 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 
 
-
-        /*
-        double f = currentSpeedFactor.getFactor();
-
-        Arm_rightY = new ScalingInputExtractor(driver2.left_stick_y, f);
-        robotCfg.Motor_ArmBase.setPower(Arm_rightY.getValue());
-
-        telemetry.addData("Arm Movement: ", Arm_rightY.getValue());
-        telemetry.update();
-        */
 
     }
 
@@ -290,15 +276,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
 
         }
-        /*
-        double f = currentSpeedFactor.getFactor();
-        Lift_leftY = new ScalingInputExtractor(driver2.right_stick_y, f);
-        robotCfg.Motor_LiftLeft.setPower(Lift_leftY.getValue());
-        robotCfg.Motor_LiftLeft.setPower(-Lift_leftY.getValue());
 
-        telemetry.addData("Lift Movement: ", Lift_leftY.getValue());
-        telemetry.update();
-       */
     }
 
 
@@ -389,20 +367,6 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     protected void act() {
 
 
-/*
-        if(driver1.a.justPressed()) {
-            if (currentSpeedFactor == MotorSpeedFactor.FAST) {
-                currentSpeedFactor = MotorSpeedFactor.SLOW;
-            } else {
-                currentSpeedFactor = MotorSpeedFactor.FAST;
-            }
-            double f = currentSpeedFactor.getFactor();
-            leftX.setFactor(f);
-            rightY.setFactor(f);
-            rightX.setFactor(f);
-        }
-*/
-
         if(driver2.y.isPressed()){
             Dump_Auto_Seq("enable");
             controlState = 1;
@@ -478,12 +442,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
         telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
         telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
-        /*
-        telemetry.addData("\nLeft Servo Pos", robotCfg.Servo_InL.getPosition());
-        telemetry.addData("\nRight Servo Pos", robotCfg.Servo_InR.getPosition());
-        telemetry.addData("\nLeft Servo Dir", robotCfg.Servo_InL.getDirection());
-        telemetry.addData("\nRight Servo Dir", robotCfg.Servo_InR.getDirection());
-        */
+
         telemetry.update();
 
 
