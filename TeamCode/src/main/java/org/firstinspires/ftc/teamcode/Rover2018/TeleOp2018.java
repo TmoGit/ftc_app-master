@@ -5,6 +5,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.BaseEncoding;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.exception.RobotCoreException;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.robot.Robot;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.Range;
 
@@ -35,19 +40,39 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor Arm_rightY;
     ScalingInputExtractor Lift_leftY;
 
+    static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder - find value for rev
+    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
+    static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
+    //static final double     DRIVE_SPEED             = 0.6;
+    //static final double     TURN_SPEED              = 0.5;
+
     public double MOTOR_RUNSPEED = 0.75;
     public double SERVO_RUNSPEED_DOWN = 0.25;
     public double SERVO_RUNSPEED_UP   = 0.75;
     public double SERVO_STOP = 0.5;
+    public double LIFT_POSITION = 8.0;
+    public double ARM_NEUTRAL_POSITION = 2.5;
+    public double ARM_CAPTURE_POSITION = 4.0;
+
 
     public double LSWEEPER_POWER = 0.0;
     public double RSWEEPER_POWER = 0.0;
 
 
-    double lPos = 0.0;
-    double rPos = 0.0;
+  //  double lPos = 0.0;
+   // double rPos = 0.0;
 
-    short constrolState =2, stepCounter =0;
+    int controlState = 0;
+    int SequencerStepsMax = 6;
+    int Step_Bump = 5000;
+
+    int Current_Seq_Step = 0;
+    boolean[] boolStep_Confirm = new boolean[SequencerStepsMax];
+    boolean SequencerIsActive = false;
+    boolean SequencerIsComplete = false;
+
+    private ElapsedTime runtime = new ElapsedTime();
 
     class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
@@ -65,6 +90,24 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
     }
     private MotorSpeedFactor currentSpeedFactor = MotorSpeedFactor.FAST;
+
+    public static void sleep(long sleepTime)
+    {
+        long wakeupTime = System.currentTimeMillis() + sleepTime;
+
+        while (sleepTime > 0)
+        {
+            try
+            {
+                Thread.sleep(sleepTime);
+            }
+            catch (InterruptedException e)
+            {
+                sleepTime = wakeupTime - System.currentTimeMillis();
+            }
+        }
+    }
+
 
     enum MotorSpeedFactor {
         FAST(1.0), SLOW(0.5);
@@ -142,25 +185,80 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     }
 
-    private void Bump_Timer(){
+    private void Bump_Timer(int timeout){
+        sleep(timeout);
+    }
+
+    private void Sequencer(int step_advance, boolean Status){
+        if (Current_Seq_Step != SequencerStepsMax){
+            SequencerIsComplete = false;
+        }
+        if (Current_Seq_Step == SequencerStepsMax+1){
+            SequencerIsComplete = true;
+            Current_Seq_Step = 0;
+            for (int i = 0; i < SequencerStepsMax; i++){
+                boolStep_Confirm[i] = false;
+            }
+            runtime.reset();
+        }
+        if (Status == true){
+            SequencerIsActive = true;
+        }
+        if (Status == false){
+            SequencerIsActive = false;
+
+        }
+        Current_Seq_Step = Current_Seq_Step + step_advance;
+        Bump_Timer(Step_Bump);
+
 
     }
 
-    private void Sequence(){
 
 
-    }
+    private boolean Reset() {
+/*
+        Arm_Control(-MOTOR_RUNSPEED, -ARM_NEUTRAL_POSITION);
+        Bump_Timer(5000);
 
-    private boolean Reset(){
-        Arm_Control(0);
-        Lift_Control(0);
+
+        Lift_Control(-MOTOR_RUNSPEED,-LIFT_POSITION);
+        Bump_Timer(5000);
+
+        Bucket_Control("CAPTURE");
+        Bump_Timer(5000);
+*/
         return true;
     }
 
 
-    private void Arm_Control(double power)
+
+    private void Arm_Control(double power, double inchDist)
     {
-        robotCfg.Motor_ArmBase.setPower(power);
+        if(controlState == 0) {
+            robotCfg.Motor_ArmBase.setPower(power);
+        }
+
+        else if (controlState == 1){
+            int newArmTarget = 0;
+
+            newArmTarget = robotCfg.Motor_ArmBase.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+
+            robotCfg.Motor_ArmBase.setTargetPosition(newArmTarget);
+
+            // Turn On RUN_TO_POSITION
+            robotCfg.Motor_ArmBase.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Move to position
+            while (robotCfg.Motor_ArmBase.getCurrentPosition() != newArmTarget){
+                robotCfg.Motor_ArmBase.setPower(power);
+            }
+            if (robotCfg.Motor_ArmBase.getCurrentPosition() >= newArmTarget) {
+                robotCfg.Motor_ArmBase.setPower(0);
+
+            }
+        }
+
         /*
         double f = currentSpeedFactor.getFactor();
 
@@ -173,10 +271,41 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     }
 
-    private void Lift_Control(double power)
+    private void Lift_Control(double power, double inchDist)
     {
-        robotCfg.Motor_LiftRight.setPower(power);
-        robotCfg.Motor_LiftLeft.setPower(-power);
+        if(controlState == 0) {
+            robotCfg.Motor_LiftRight.setPower(power);
+            robotCfg.Motor_LiftLeft.setPower(-power);
+        }
+
+
+        else if (controlState == 1) {
+            int newLiftLeftTarget =0;
+            int newLiftRightTarget =0;
+
+            newLiftLeftTarget = robotCfg.Motor_LiftLeft.getCurrentPosition() + (int) (-inchDist * COUNTS_PER_INCH);
+            newLiftRightTarget = robotCfg.Motor_LiftRight.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+
+
+            robotCfg.Motor_LiftLeft.setTargetPosition(newLiftLeftTarget);
+            robotCfg.Motor_LiftRight.setTargetPosition(newLiftRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            robotCfg.Motor_LiftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robotCfg.Motor_LiftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Move to position
+            while (robotCfg.Motor_LiftLeft.getCurrentPosition() != newLiftLeftTarget  && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget ){
+                robotCfg.Motor_LiftLeft.setPower(power);
+                robotCfg.Motor_LiftRight.setPower(-power);
+            }
+            if (robotCfg.Motor_LiftLeft.getCurrentPosition() >= newLiftLeftTarget && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget) {
+                robotCfg.Motor_LiftRight.setPower(0);
+                robotCfg.Motor_LiftLeft.setPower(0);
+
+            }
+
+        }
 
         /*
         double f = currentSpeedFactor.getFactor();
@@ -211,7 +340,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if (pos == "DUMP") {
             bucketPos = Range.clip(dumpPos, upPos, dumpPos);
         }
-        else if (pos == "UP") {
+        else if (pos == "CAPTURE") {
             bucketPos = Range.clip(upPos, upPos, dumpPos);
         }
 
@@ -229,11 +358,76 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
      //   robotCfg.Servo_InL.setPosition(lPos);
      //   robotCfg.Servo_InR.setPosition(rPos);
+        if(controlState == 0) {
+            robotCfg.Servo_InR.setPower(rightPower);
+            robotCfg.Servo_InL.setPower(-leftPower);
+        }
 
-        robotCfg.Servo_InR.setPower(rightPower);
-        robotCfg.Servo_InL.setPower(-leftPower);
+        else if(controlState == 1){
+            //run for a time
+        }
+    }
+
+    private void Dump_Auto_Sequence(String status) {
+        if (status == "enable" && controlState == 1) {
+
+            if (Current_Seq_Step == 0) {
+                //Setup
+                if (Reset() == true) {
+                    Sequencer(1, true);
+                } else {
+                    for (int i = 0; i < 3; i++) {
+                        if (Reset() == true) {
+                            Sequencer(1, true);
+                        }
+                    }
+                    //Generate error
+                }
+            }
+
+        }
+
+
+        if (Current_Seq_Step == 1 && boolStep_Confirm[0] == true) {
+
+            Arm_Control(MOTOR_RUNSPEED, ARM_CAPTURE_POSITION);
+            Sequencer(1, true);
+
+            boolStep_Confirm[Current_Seq_Step] = true;
+        }
+        if (Current_Seq_Step == 2 && boolStep_Confirm[1] == true) {
+            // Sweeper spin back
+
+            Sequencer(1, true);
+
+            boolStep_Confirm[Current_Seq_Step] = true;
+        }
+        if (Current_Seq_Step == 3 && boolStep_Confirm[2] == true) {
+            Arm_Control(-MOTOR_RUNSPEED, -ARM_NEUTRAL_POSITION);
+            Sequencer(1, true);
+
+            boolStep_Confirm[Current_Seq_Step] = true;
+        }
+        if (Current_Seq_Step == 4 && boolStep_Confirm[3] == true) {
+            Lift_Control(MOTOR_RUNSPEED, LIFT_POSITION);
+            Sequencer(1, true);
+
+            boolStep_Confirm[Current_Seq_Step] = true;
+        }
+        if (Current_Seq_Step == 5 && boolStep_Confirm[4] == true) {
+
+            Sequencer(1, false);
+        }
+
+        if (status == "disable") {
+            controlState = 0;
+        }
 
     }
+
+
+
+
     @Override
     protected void go() {
         forwardControl();
@@ -258,52 +452,56 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 */
 
-
-
-
-        //Arm control
-        if(driver2.right_bumper.isPressed()){
-            Arm_Control(MOTOR_RUNSPEED);
-            telemetry.addData("Arm Movement ", "UP");
-            telemetry.update();
-        }
-        else if(driver2.left_bumper.isPressed()){
-            Arm_Control(-MOTOR_RUNSPEED*(0.75));
-            telemetry.addData("Arm Movement ", "DOWN");
-            telemetry.update();
-        }
-        else {
-            Arm_Control(0.0);
+        if (driver2.y.isPressed()) {
+            Dump_Auto_Sequence("enable");
+            controlState = 1;
         }
 
-        //Lift Control
-        if(driver2.dpad_up.isPressed()) {
-            Lift_Control(MOTOR_RUNSPEED);
-            telemetry.addData("Lift Movement ", "Up");
-            telemetry.update();
-        }
-        else if(driver2.dpad_down.isPressed()) {
-            Lift_Control(-(MOTOR_RUNSPEED));
-            telemetry.addData("Lift Movement ", "DOWN");
-            telemetry.update();
-        }
-        else {
-            Lift_Control(0.0);
+        if (driver2.x.isPressed()) {
+            Dump_Auto_Sequence("disable");
+            controlState = 0;
         }
 
-        //Bucket Control
-        if(driver1.right_bumper.isPressed()){
-            //Preset_Bucket_Control("UP");
+        if(controlState == 0) {
+            //Arm control
+            if (driver2.right_bumper.isPressed()) {
+                Arm_Control(MOTOR_RUNSPEED, 0);
+                telemetry.addData("Arm Movement ", "UP");
+                telemetry.update();
+            } else if (driver2.left_bumper.isPressed()) {
+                Arm_Control(-MOTOR_RUNSPEED * (0.75), 0);
+                telemetry.addData("Arm Movement ", "DOWN");
+                telemetry.update();
+            } else {
+                Arm_Control(0.0, 0);
+            }
 
-            Manual_Bucket_Control(SERVO_RUNSPEED_DOWN);
-        }
-        else if(driver1.left_bumper.isPressed()){
-            //Preset_Bucket_Control("DUMP");
+            //Lift Control
+            if (driver2.dpad_up.isPressed()) {
+                Lift_Control(MOTOR_RUNSPEED, 0);
+                telemetry.addData("Lift Movement ", "Up");
+                telemetry.update();
+            } else if (driver2.dpad_down.isPressed()) {
+                Lift_Control(-(MOTOR_RUNSPEED), 0);
+                telemetry.addData("Lift Movement ", "DOWN");
+                telemetry.update();
+            } else {
+                Lift_Control(0.0, 0);
+            }
 
-            Manual_Bucket_Control(SERVO_RUNSPEED_UP);
+            //Bucket Control
+            if (driver1.right_bumper.isPressed()) {
+                //Preset_Bucket_Control("UP");
+
+                Manual_Bucket_Control(SERVO_RUNSPEED_DOWN);
+            } else if (driver1.left_bumper.isPressed()) {
+                //Preset_Bucket_Control("DUMP");
+
+                Manual_Bucket_Control(SERVO_RUNSPEED_UP);
+            } else
+                Manual_Bucket_Control(SERVO_STOP);
         }
-        else
-            Manual_Bucket_Control(SERVO_STOP);
+
 
         //Sweeper Control
         if(driver2.left_stick_y.getRawValue() >= 0.2){
