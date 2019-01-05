@@ -35,9 +35,14 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor Arm_rightY;
     ScalingInputExtractor Lift_leftY;
 
-    public double MOTOR_RUNSPEED = 0.5;
+    public double MOTOR_RUNSPEED = 0.75;
+    public double SERVO_RUNSPEED_DOWN = 0.25;
+    public double SERVO_RUNSPEED_UP   = 0.75;
+    public double SERVO_STOP = 0.5;
+
     public double LSWEEPER_POWER = 0.0;
     public double RSWEEPER_POWER = 0.0;
+
 
     double lPos = 0.0;
     double rPos = 0.0;
@@ -134,9 +139,9 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
 
 
-       // Arm_Control();
-      //  Lift_Control();
+
     }
+
     private void Bump_Timer(){
 
     }
@@ -183,9 +188,24 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         telemetry.update();
        */
     }
-    private void Bucket_Control(String pos)
+
+
+
+    private void Manual_Bucket_Control(double power)
     {
-        double dumpPos = 0.5, upPos = 0.0, bucketPos = upPos;
+        double max = 1, min = -0.5, bucketPos = SERVO_STOP;
+
+
+
+        bucketPos = Range.clip(power, min, max);
+
+        robotCfg.Servo_Out.setPosition(bucketPos);
+
+    }
+
+    private void Preset_Bucket_Control(String pos)
+    {
+        double dumpPos = 0.25, upPos = -0.25, bucketPos = upPos;
 
 
         if (pos == "DUMP") {
@@ -209,6 +229,10 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
      //   robotCfg.Servo_InL.setPosition(lPos);
      //   robotCfg.Servo_InR.setPosition(rPos);
+
+        robotCfg.Servo_InR.setPower(rightPower);
+        robotCfg.Servo_InL.setPower(-leftPower);
+
     }
     @Override
     protected void go() {
@@ -244,7 +268,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             telemetry.update();
         }
         else if(driver2.left_bumper.isPressed()){
-            Arm_Control(-MOTOR_RUNSPEED);
+            Arm_Control(-MOTOR_RUNSPEED*(0.75));
             telemetry.addData("Arm Movement ", "DOWN");
             telemetry.update();
         }
@@ -259,7 +283,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             telemetry.update();
         }
         else if(driver2.dpad_down.isPressed()) {
-            Lift_Control(-MOTOR_RUNSPEED);
+            Lift_Control(-(MOTOR_RUNSPEED));
             telemetry.addData("Lift Movement ", "DOWN");
             telemetry.update();
         }
@@ -269,12 +293,17 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
         //Bucket Control
         if(driver1.right_bumper.isPressed()){
-            Bucket_Control("UP");
-        }
+            //Preset_Bucket_Control("UP");
 
-        if(driver1.left_bumper.isPressed()){
-            Bucket_Control("DUMP");
+            Manual_Bucket_Control(SERVO_RUNSPEED_DOWN);
         }
+        else if(driver1.left_bumper.isPressed()){
+            //Preset_Bucket_Control("DUMP");
+
+            Manual_Bucket_Control(SERVO_RUNSPEED_UP);
+        }
+        else
+            Manual_Bucket_Control(SERVO_STOP);
 
         //Sweeper Control
         if(driver2.left_stick_y.getRawValue() >= 0.2){
@@ -300,6 +329,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
         Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
 
+        telemetry.addData("\nBucket Positon", robotCfg.Servo_Out.getPosition());
         telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
         telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
         /*

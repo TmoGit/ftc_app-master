@@ -39,6 +39,7 @@ import ftc.evlib.util.FileUtil;
 import ftc.evlib.hardware.sensors.Gyro;
 import ftc.evlib.util.StepTimer;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
@@ -76,8 +77,8 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelBR = null;
 
     //Defining Servos
-    public Servo Servo_InL = null;
-    public Servo Servo_InR = null;
+    public CRServo Servo_InL = null;
+    public CRServo Servo_InR = null;
     public Servo Servo_Out = null;
 
     public static final double OutUpPos       =  0.0 ;
@@ -161,8 +162,32 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
 
-       // Motor_ArmBase.setPower(0.0);
-        Motor_ArmBase.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //This is where we intilize the servos
+        Servo_InR = hardwareMap.get(CRServo.class, "Servo_InR");
+        Servo_InL = hardwareMap.get(CRServo.class, "Servo_InL");
+        Servo_Out = hardwareMap.get(Servo.class, "Servo_Out");
+
+
+
+
+        //Reset Encoders
+        Motor_ArmBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_LiftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_LiftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Run using encoders
+        Motor_ArmBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_LiftLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_LiftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 //        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
