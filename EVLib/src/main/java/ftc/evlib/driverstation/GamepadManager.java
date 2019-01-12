@@ -66,6 +66,8 @@ public class GamepadManager {
 
     }
 
+
+
     public void update() {
         //update all the values
         a.update();
