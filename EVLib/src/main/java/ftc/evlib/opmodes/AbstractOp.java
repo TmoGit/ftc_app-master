@@ -140,7 +140,7 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
     public void loop() {
         double deltaTime = matchTimer.update(); //update the delta time since the last loop
         telemetry.addData("Delta Time: ", deltaTime);
-
+/*
         //stop the robot when the match ends
         if (matchTimer.isMatchJustOver()) stop();
         if (matchTimer.isMatchOver()) return;
@@ -148,7 +148,7 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
         long timeLeft = matchTimer.getTimeLeft();
         if (timeLeft > 0) {
             telemetry.addData("Time left", timeLeft / 1000.0);
-        }
+        }*/
 
         pre_act();
 
