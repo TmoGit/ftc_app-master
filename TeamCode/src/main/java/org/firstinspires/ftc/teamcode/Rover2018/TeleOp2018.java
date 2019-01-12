@@ -177,7 +177,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if (Current_Seq_Step == SequencerStepsMax+1){
             SequencerIsComplete = true;
             Current_Seq_Step =0;
-            for (int i=0; i>SequencerStepsMax; i++){
+            for (int i=0; i<SequencerStepsMax; i++){
                 boolStep_Confirm[i] = false;
             }
             runtime.reset();
@@ -205,6 +205,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         Bump_Timer(5000);
 
         Bucket_Control("UP");
+        //
         Bump_Timer(5000);
 
         return true;
@@ -234,7 +235,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
             if (robotCfg.Motor_ArmBase.getCurrentPosition() >= newArmTarget) {
                 robotCfg.Motor_ArmBase.setPower(0);
-                boolStep_Confirm[Current_Seq_Step] = true;
+
             }
         }
 
@@ -299,8 +300,15 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     {
        // double lPos = robotCfg.Servo_InL.getPosition() + leftPower;
        // double rPos = robotCfg.Servo_InR.getPosition() + rightPower;
+       if(controlState == 0) {
+           robotCfg.Servo_InL.setPower(leftPower);
+           robotCfg.Servo_InR.setPower(rightPower);
+       }
 
+       else if (controlState == 1) {
 
+          }
+       }
 
         //robotCfg.Servo_InR.setDirection();
 
@@ -310,7 +318,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     private void Dump_Auto_Seq(String status) {
 
-        if (status == "enable") {
+        if (status == "enable" & controlState == 1) {
 
             if (Current_Seq_Step == 0) {
                 //Setup
@@ -331,6 +339,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
                 Arm_Control(MOTOR_RUNSPEED, ARM_CAPTURE_POSITION);
                 Sequencer(1, true);
+
             }
             if (Current_Seq_Step == 2 && boolStep_Confirm[1] == true) {
                 // Sweeper spin back
@@ -352,7 +361,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
         if (status == "disable"){
             ///
-
+            controlState = 0;
         }
 
         }
@@ -419,26 +428,32 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         //Sweeper Control
         if(driver2.left_stick_y.getRawValue() >= 0.2){
             LSWEEPER_POWER =  -1;
+            Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
         }
         else if(driver2.left_stick_y.getRawValue() <= -0.2){
             LSWEEPER_POWER = 1;
+            Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
         }
         else{
             LSWEEPER_POWER =  0;
+            Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
         }
 
 
         if(driver2.right_stick_y.getRawValue() >= 0.2){
             RSWEEPER_POWER =  -1;
+            Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
         }
         else if(driver2.right_stick_y.getRawValue() <= -0.2){
             RSWEEPER_POWER = 1;
+            Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
         }
         else{
             RSWEEPER_POWER =  0;
+            Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
         }
 
-        Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
+
 
         telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
         telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());

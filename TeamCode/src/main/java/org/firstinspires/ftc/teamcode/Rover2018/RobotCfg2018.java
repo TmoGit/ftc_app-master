@@ -39,6 +39,8 @@ import ftc.evlib.util.FileUtil;
 import ftc.evlib.hardware.sensors.Gyro;
 import ftc.evlib.util.StepTimer;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
+//import com.qualcomm.robotcore.hardware.CSservo;
 
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
@@ -77,8 +79,8 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelBR = null;
 
     //Defining Servos
-    public Servo Servo_InL = null;
-    public Servo Servo_InR = null;
+    public CRServo Servo_InL = null;
+    public CRServo Servo_InR = null;
     public Servo Servo_Out = null;
 
     public static final double OutUpPos       =  0.0 ;
