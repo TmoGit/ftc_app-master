@@ -6,6 +6,7 @@ import ftc.electronvolts.util.AnalogInputScaler;
 import ftc.electronvolts.util.DigitalInputEdgeDetector;
 import ftc.electronvolts.util.Function;
 import ftc.electronvolts.util.Functions;
+import ftc.electronvolts.util.InputExtractor;
 import ftc.evlib.driverstation.GamepadIEFactory;
 
 /**
@@ -57,6 +58,12 @@ public class GamepadManager {
         right_stick_y = new AnalogInputScaler(GamepadIEFactory.right_stick_y(gamepad), scalingFunction);
         left_trigger = new AnalogInputScaler(GamepadIEFactory.left_trigger(gamepad), scalingFunction);
         right_trigger = new AnalogInputScaler(GamepadIEFactory.right_trigger(gamepad), scalingFunction);
+
+
+
+
+
+
     }
 
     public void update() {
