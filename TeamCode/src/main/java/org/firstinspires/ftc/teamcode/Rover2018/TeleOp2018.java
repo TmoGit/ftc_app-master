@@ -40,7 +40,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     ScalingInputExtractor Arm_rightY;
     ScalingInputExtractor Lift_leftY;
 
-    static final double     COUNTS_PER_MOTOR_REV    = 288 ;    // eg: 1440, TETRIX Motor Encoder - find value for rev
+    static final double     COUNTS_PER_MOTOR_REV    = 288 ;    // eg: 288 - Value for Rev motors
     static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 1.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_INCHES * 3.1415);
@@ -181,8 +181,13 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
-
-
+        InputExtractor<Double> z = new InputExtractor<Double>() {
+            @Override
+            public Double getValue() {
+                return -0.5;
+            }
+        };
+        rightX = new ScalingInputExtractor(z, f);
 
     }
 
@@ -551,6 +556,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         telemetry.addData("\nBucket Positon", robotCfg.Servo_Out.getPosition());
         telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
         telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
+
+
 
 
         if (controlState == 1) {

@@ -171,7 +171,7 @@ public class RobotCfg2018 extends RobotCfg {
 
 
         //Reset Encoders
-        Motor_ArmBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+     /*   Motor_ArmBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_LiftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_LiftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_WheelFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -186,7 +186,7 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_WheelFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_WheelFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_WheelBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
 
 
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -358,6 +358,8 @@ public class RobotCfg2018 extends RobotCfg {
 
 
     }
+
+
     @Override
     public void stop() {
         mecanumControl.stop();

@@ -59,6 +59,8 @@ public class GamepadManager {
         right_trigger = new AnalogInputScaler(GamepadIEFactory.right_trigger(gamepad), scalingFunction);
     }
 
+
+
     public void update() {
         //update all the values
         a.update();
