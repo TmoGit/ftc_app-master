@@ -36,13 +36,14 @@ import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Hardware;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.util.Range;
 import ftc.electronvolts.util.Function;
 import ftc.electronvolts.util.Functions;
-
+import ftc.electronvolts.util.Vector2D;
 import org.firstinspires.ftc.teamcode.Rover2018.RobotCfg2018;
 
 import ftc.electronvolts.util.AnalogInputScaler;
@@ -101,6 +102,9 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 public class AutoOp2019 extends LinearOpMode {
 
     /* Declare OpMode members. */
+
+
+
     RobotCfg2018         robot   = new RobotCfg2018(hardwareMap);
     private ElapsedTime     runtime = new ElapsedTime();
 
@@ -118,8 +122,15 @@ public class AutoOp2019 extends LinearOpMode {
     double gyVal = 0;
     double grVal = 0;
 
+    Vector2D XYVector;
 
-    class ScalingInputExtractor implements InputExtractor<Double> {
+    public Vector2D getXYVector() {
+        return XYVector;
+    }
+
+
+
+        class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
         private double factor;
         ScalingInputExtractor(InputExtractor<Double> ext, double f) {

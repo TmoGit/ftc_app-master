@@ -41,6 +41,7 @@ public abstract class RobotCfg {
 //    public RobotCfg(){}
     public RobotCfg(HardwareMap hardwareMap) {
         //get the phone accelerometer and wakelock
+
         phoneContext = hardwareMap.appContext;
         phoneSensorManager = (SensorManager) phoneContext.getSystemService(Context.SENSOR_SERVICE);
         phoneAccelerometer = phoneSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);

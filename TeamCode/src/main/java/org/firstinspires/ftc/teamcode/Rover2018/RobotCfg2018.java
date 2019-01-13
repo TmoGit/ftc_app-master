@@ -40,6 +40,7 @@ import ftc.evlib.hardware.sensors.Gyro;
 import ftc.evlib.util.StepTimer;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.util.Hardware;
 
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
@@ -145,6 +146,10 @@ public class RobotCfg2018 extends RobotCfg {
         this(hardwareMap, ServoCfg.defaultServoStartPresetMap(MainServoName.values()));
     }
 
+    public static void init() {
+
+
+    }
 
     public RobotCfg2018(HardwareMap hardwareMap, Map<ServoName, Enum> servoStartPresetMap) {
         super(hardwareMap);
@@ -171,7 +176,7 @@ public class RobotCfg2018 extends RobotCfg {
 
 
         //Reset Encoders
-     /*   Motor_ArmBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Motor_ArmBase.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_LiftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_LiftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_WheelFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -186,7 +191,7 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_WheelFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_WheelFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_WheelBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
+        Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
