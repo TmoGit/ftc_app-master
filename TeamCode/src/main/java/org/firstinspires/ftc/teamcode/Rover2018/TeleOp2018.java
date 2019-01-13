@@ -175,19 +175,21 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     private void forwardControl() {
         double f = currentSpeedFactor.getFactor();
         rightY = new ScalingInputExtractor(InputExtractors.negative(driver1.left_stick_y), f);
-        leftX = new ScalingInputExtractor(InputExtractors.negative(driver1.right_stick_x), f);
+        leftX = new ScalingInputExtractor(driver1.right_stick_x, f);//Inverted turning inputs
         rightX = new ScalingInputExtractor(driver1.left_stick_x, f);
         //noinspection SuspiciousNameCombination
         robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //        robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
         robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
-        InputExtractor<Double> z = new InputExtractor<Double>() {
+
+
+      /*  InputExtractor<Double> z = new InputExtractor<Double>() {
             @Override
             public Double getValue() {
                 return -0.5;
             }
         };
-        rightX = new ScalingInputExtractor(z, f);
+        rightX = new ScalingInputExtractor(z, f);*/
 
     }
 
@@ -469,7 +471,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 */
 
         if (driver2.x.isPressed()) {
-            controlState = 1;
+            //controlState = 1;
 
             telemetry.addData("Robot Control State is semi-auto, set:", controlState);
             telemetry.update();
@@ -516,11 +518,11 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
 
             //Bucket Control
-            if (driver1.right_bumper.isPressed()) {
+            if (driver2.a.isPressed()) {
                 //Preset_Bucket_Control("UP");
 
                 Manual_Bucket_Control(SERVO_RUNSPEED_DOWN);
-            } else if (driver1.left_bumper.isPressed()) {
+            } else if (driver2.b.isPressed()) {
                 //Preset_Bucket_Control("DUMP");
 
                 Manual_Bucket_Control(SERVO_RUNSPEED_UP);
@@ -553,18 +555,22 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
         Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);
 
-        telemetry.addData("\nBucket Positon", robotCfg.Servo_Out.getPosition());
-        telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
-        telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
-
+        //telemetry.addData("\nBucket Positon", robotCfg.Servo_Out.getPosition());
+        //telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
+        //telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
+        telemetry.addData("Current Arm Position: ", robotCfg.Motor_ArmBase.getCurrentPosition());
+        telemetry.addData("Current Left Lift Position: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
+        telemetry.addData("Current Right Lift Position: ", robotCfg.Motor_LiftRight.getCurrentPosition());
+        telemetry.addData("Current Motor_FL Position: ", robotCfg.Motor_WheelFL.getCurrentPosition());
+        telemetry.addData("Current Motor_FR Position: ", robotCfg.Motor_WheelFR.getCurrentPosition());
+        telemetry.addData("Current Motor_BL Position: ", robotCfg.Motor_WheelBL.getCurrentPosition());
+        telemetry.addData("Current Motor_BR Position: ", robotCfg.Motor_WheelBR.getCurrentPosition());
 
 
 
         if (controlState == 1) {
 
-            telemetry.addData("Current Arm Position: ", robotCfg.Motor_ArmBase.getCurrentPosition());
-            telemetry.addData("Current Left Lift Position: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
-            telemetry.addData("Current Right Lift Position: ", robotCfg.Motor_LiftRight.getCurrentPosition());
+
             telemetry.addData("Sweepers are running?", Spin_Active_Flag);
             telemetry.addData("Current Sequencer Step", Current_Seq_Step);
 
@@ -582,7 +588,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         telemetry.update();
 
 
-        if(driver1.dpad_up.isPressed() && !driver1.dpad_right.isPressed() && !driver1.dpad_left.isPressed()){
+      /*  if(driver1.dpad_up.isPressed() && !driver1.dpad_right.isPressed() && !driver1.dpad_left.isPressed()){
 
         }
         else if(driver1.dpad_down.justPressed() && !driver1.dpad_right.isPressed() && !driver1.dpad_left.isPressed()){
@@ -593,7 +599,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
         else if(driver1.dpad_left.justPressed() && !driver1.dpad_down.isPressed() && !driver1.dpad_right.isPressed()){
 
-        }
+        }*/
 
 
 

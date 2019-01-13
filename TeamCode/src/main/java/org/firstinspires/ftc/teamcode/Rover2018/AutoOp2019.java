@@ -98,7 +98,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  */
 
 @Autonomous(name="AutoOp2019", group="Official")
-
+@Disabled
 public class AutoOp2019 extends LinearOpMode {
 
     /* Declare OpMode members. */

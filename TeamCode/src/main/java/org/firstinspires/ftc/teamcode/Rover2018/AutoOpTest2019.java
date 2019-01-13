@@ -86,6 +86,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     private ElapsedTime     runtime = new ElapsedTime();
 
 
+
     static final double     COUNTS_PER_MOTOR_REV    = 288 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -93,12 +94,324 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                                                       (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     MOTOR_RUNSPEED            = 0.75;
     static final double     TURN_SPEED              = 0.5;
+    boolean isRunning = false;
 
     double gxVal = 0;
     double gyVal = 0;
     double grVal = 0;
 
     Vector2D XYVector;
+
+    public enum State { // Ideally, these stay in order of how we use them
+        STATE_INITIAL,
+        STATE_DROP,
+        STATE_DETACH_LANDER,
+        STATE_STRAFE_RIGHT,
+        STATE_CLEAR_LANDER,
+        STATE_LINEUP,
+        STATE_BACK,
+        STATE_SCAN_MINERALS,
+        STATE_HIT_CUBE,
+        STATE_TURN_TO_DEPOT,
+        STATE_DRIVE_TO_DEPOT,
+        STATE_DROP_MARKER,
+        STATE_TURN_TO_CRATER,
+        STATE_STRAFE_TO_WALL,
+        STATE_CLEAR_WALL,
+        STATE_DRIVE_TO_CRATER,
+        STATE_FLUSH_WALL,
+        STATE_APPROACH_CRATER,
+        STATE_TELEOP_INIT,
+        STATE_STOP,
+        STATE_COMPLETE
+    }
+
+    private State currentState = State.STATE_INITIAL;
+    private int stateCounter = 0;
+
+
+
+    private void stateStepper(State newState){
+
+
+        currentState = newState;
+
+        stateCounter++;
+
+    }
+
+    private void stateCall(){
+        telemetry.addData("Current State:", currentState);
+        telemetry.update();
+
+        switch (currentState){
+            case STATE_INITIAL:
+
+               // if(sleep(500)) {
+                    stateStepper(State.STATE_DROP);
+               // }
+                break;
+            case STATE_DROP:
+
+               // if(sleep(500)) {
+                    stateStepper(State.STATE_DETACH_LANDER);
+              //  }
+                break;
+            case STATE_DETACH_LANDER:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_STRAFE_RIGHT);
+                }
+                break;
+            case STATE_STRAFE_RIGHT:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_CLEAR_LANDER:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_LINEUP:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_BACK:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_SCAN_MINERALS:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_HIT_CUBE:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_TURN_TO_DEPOT:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_DRIVE_TO_DEPOT:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_DROP_MARKER:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_TURN_TO_CRATER:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_STRAFE_TO_WALL:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_CLEAR_WALL:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_DRIVE_TO_CRATER:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_FLUSH_WALL:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_APPROACH_CRATER:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+            case STATE_STOP:
+
+                if(sleep(500)) {
+                    stateStepper(State.STATE_COMPLETE);
+                }
+                break;
+        }
+
+
+    }
+
+
+
+    public boolean sleep(long sleepTime)  {
+        runtime.reset();
+
+        while(opModeIsActive() && runtime.milliseconds() <= sleepTime){
+            return false;
+        }
+
+
+        return true;
+    }
+
+    public boolean opModeIsActive(){
+        return isRunning;
+    }
+
+
+    class ScalingInputExtractor implements InputExtractor<Double> {
+        InputExtractor<Double> ext;
+        private double factor;
+        ScalingInputExtractor(InputExtractor<Double> ext, double f) {
+            this.ext = ext;
+            this.factor = f;
+        }
+        @Override
+        public Double getValue() {
+            return ext.getValue()*factor;
+        }
+        public void setFactor(double f) {
+            this.factor = f;
+        }
+    }
+
+
+    private void Lift_Control(double power, double inchDist, int controlState) {
+        if (controlState == 0) {
+            robotCfg.Motor_LiftRight.setPower(power);
+            robotCfg.Motor_LiftLeft.setPower(-power);
+        } else if (controlState == 1) {
+            int newLiftLeftTarget = 0;
+            int newLiftRightTarget = 0;
+
+            newLiftLeftTarget = robotCfg.Motor_LiftLeft.getCurrentPosition() + (int) (-inchDist * COUNTS_PER_INCH);
+            newLiftRightTarget = robotCfg.Motor_LiftRight.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+
+
+            robotCfg.Motor_LiftLeft.setTargetPosition(newLiftLeftTarget);
+            robotCfg.Motor_LiftRight.setTargetPosition(newLiftRightTarget);
+
+            // Turn On RUN_TO_POSITION
+            robotCfg.Motor_LiftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robotCfg.Motor_LiftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // Move to position
+            while (robotCfg.Motor_LiftLeft.getCurrentPosition() != newLiftLeftTarget && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget && opModeIsActive()) {
+                robotCfg.Motor_LiftLeft.setPower(power);
+                robotCfg.Motor_LiftRight.setPower(-power);
+
+
+                telemetry.addData("Lift Left Motor ENC VAL: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
+                telemetry.addData("Lift Right Motor ENC VAL: ", robotCfg.Motor_LiftRight.getCurrentPosition());
+                telemetry.update();
+            }
+            if (robotCfg.Motor_LiftLeft.getCurrentPosition() >= newLiftLeftTarget && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget) {
+                robotCfg.Motor_LiftRight.setPower(0);
+                robotCfg.Motor_LiftLeft.setPower(0);
+            }
+
+        }
+    }
+
+
+    private void Forward_Control(double xVec, double yVec, double rVec, int runTime){
+
+        ScalingInputExtractor rightY;
+        ScalingInputExtractor leftX;
+        ScalingInputExtractor rightX;
+
+        gxVal = xVec;
+        gyVal = yVec;
+        grVal = rVec;
+
+        runtime.reset();
+
+        InputExtractor<Double> x = new InputExtractor<Double>() {
+            @Override
+            public Double getValue() {
+                return gxVal;
+            }
+        };
+
+        InputExtractor<Double> y = new InputExtractor<Double>() {
+            @Override
+            public Double getValue() {
+                return gyVal;
+            }
+        };
+
+        InputExtractor<Double> r = new InputExtractor<Double>() {
+            @Override
+            public Double getValue() {
+                return grVal;
+            }
+        };
+
+
+        rightX = new ScalingInputExtractor(x, 1);
+        rightY = new ScalingInputExtractor(y, 1);
+        leftX = new ScalingInputExtractor(r, 1);
+
+        while(opModeIsActive() && runtime.milliseconds() <= runTime) {
+            robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
+//          robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
+            robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
+
+            telemetry.addData("Elapsed Time:", runTime);
+            telemetry.update();
+        }
+
+
+
+
+        //Resetting global variables
+        gxVal = 0;
+        gyVal = 0;
+        grVal = 0;
+    }
+
+    private void main_run(){
+
+
+        stateCall();
+
+    }
+
+    private void telemetry_update(){
+        telemetry.addData("Current State:", currentState);
+        telemetry.addData("State Counter:", stateCounter);
+        telemetry.addData("Runtime:", runtime);
+        telemetry.addData("Left Arm Motor ENC VAL:", robotCfg.Motor_LiftLeft.getCurrentPosition());
+        telemetry.addData("Right Arm Motor ENC VAL:", robotCfg.Motor_LiftRight.getCurrentPosition());
+        telemetry.addData("Wheel FL Motor ENC VAL:", robotCfg.Motor_WheelFL.getCurrentPosition());
+
+
+        telemetry.update();
+    }
+
 
     @Override
     protected void setup_act() {
@@ -107,16 +420,20 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     @Override
     protected void end() {
-
+        isRunning = false;
     }
 
     @Override
     protected void act() {
+        main_run();
 
+        telemetry_update();
     }
 
     @Override
     protected void go() {
+        isRunning = true;
+
 
     }
 

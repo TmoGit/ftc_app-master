@@ -128,9 +128,9 @@ public abstract class AbstractOp<Type extends RobotCfg> extends OpMode {
 
     @Override
     public void start() {
-        matchTimer.start(); //start the match
+        //matchTimer.start(); //start the match
 
-        if (logger != null) logger.start(FileUtil.getLogsDir()); // start the logging
+        //if (logger != null) logger.start(FileUtil.getLogsDir()); // start the logging
 
         robotCfg.start();
         go();

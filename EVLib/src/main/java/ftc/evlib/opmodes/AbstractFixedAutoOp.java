@@ -14,7 +14,7 @@ import ftc.evlib.hardware.config.RobotCfg;
  * @see StateMachine
  */
 public abstract class AbstractFixedAutoOp<Type extends RobotCfg> extends AbstractOp<Type> {
-    protected StateMachine stateMachine;
+    //protected StateMachine stateMachine;
 
     /**
      * This is implemented by the autonomous opmode
@@ -41,6 +41,6 @@ public abstract class AbstractFixedAutoOp<Type extends RobotCfg> extends Abstrac
 
     @Override
     public void post_act() {
-        stateMachine.act(); //update the state machine
+        //stateMachine.act(); //update the state machine
     }
 }
