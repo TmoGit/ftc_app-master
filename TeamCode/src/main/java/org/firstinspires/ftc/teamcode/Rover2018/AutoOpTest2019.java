@@ -95,39 +95,45 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     static final double     MOTOR_RUNSPEED            = 0.75;
     static final double     TURN_SPEED              = 0.5;
     boolean isRunning = false;
+    boolean isStepping = false;
+
 
     double gxVal = 0;
     double gyVal = 0;
     double grVal = 0;
 
+    public int[] TIMELINE = {};
+
     Vector2D XYVector;
 
     public enum State { // Ideally, these stay in order of how we use them
         STATE_INITIAL,
+        STATE_MOVE_ARM,
         STATE_DROP,
         STATE_DETACH_LANDER,
-        STATE_STRAFE_RIGHT,
-        STATE_CLEAR_LANDER,
-        STATE_LINEUP,
-        STATE_BACK,
+        STATE_RETRACT_LIFT,
+        STATE_RETRACT_ARM,
+        STATE_ESTABLISH_POSITION,
+        STATE_DRIVE_ROUTE,
+        STATE_DSTEP_1,
+        STATE_DSTEP_2,
+        STATE_DSTEP_3,
+        STATE_DSTEP_4,
+        STATE_DSTEP_5,
         STATE_SCAN_MINERALS,
-        STATE_HIT_CUBE,
-        STATE_TURN_TO_DEPOT,
-        STATE_DRIVE_TO_DEPOT,
+        STATE_HIT_OBJECT,
         STATE_DROP_MARKER,
-        STATE_TURN_TO_CRATER,
-        STATE_STRAFE_TO_WALL,
-        STATE_CLEAR_WALL,
-        STATE_DRIVE_TO_CRATER,
-        STATE_FLUSH_WALL,
-        STATE_APPROACH_CRATER,
-        STATE_TELEOP_INIT,
         STATE_STOP,
         STATE_COMPLETE
     }
 
     private State currentState = State.STATE_INITIAL;
     private int stateCounter = 0;
+    private int currentStep;
+    private int currentRoute;
+   // private int[][]
+   // private double[] routeVectors_1 = { }
+
 
 
 
@@ -147,110 +153,74 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         switch (currentState){
             case STATE_INITIAL:
 
-               // if(sleep(500)) {
+                if(sleep(500)) {
                     stateStepper(State.STATE_DROP);
-               // }
+                }
                 break;
             case STATE_DROP:
 
-               // if(sleep(500)) {
+                if(sleep(500)) {
                     stateStepper(State.STATE_DETACH_LANDER);
-              //  }
+                }
                 break;
             case STATE_DETACH_LANDER:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_STRAFE_RIGHT);
+                    stateStepper(State.STATE_RETRACT_LIFT);
                 }
                 break;
-            case STATE_STRAFE_RIGHT:
+            case STATE_RETRACT_LIFT:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_RETRACT_ARM);
                 }
                 break;
-            case STATE_CLEAR_LANDER:
+            case STATE_RETRACT_ARM:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_ESTABLISH_POSITION);
                 }
                 break;
-            case STATE_LINEUP:
+            case STATE_ESTABLISH_POSITION:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_DRIVE_ROUTE);
                 }
                 break;
-            case STATE_BACK:
+            case STATE_DRIVE_ROUTE:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_DSTEP_1);
                 }
                 break;
-            case STATE_SCAN_MINERALS:
+            case STATE_DSTEP_1:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_DSTEP_2);
                 }
                 break;
-            case STATE_HIT_CUBE:
+            case STATE_DSTEP_2:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_DSTEP_3);
                 }
                 break;
-            case STATE_TURN_TO_DEPOT:
+            case STATE_DSTEP_3:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_DSTEP_4);
                 }
                 break;
-            case STATE_DRIVE_TO_DEPOT:
+            case STATE_DSTEP_4:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_DSTEP_5);
                 }
                 break;
-            case STATE_DROP_MARKER:
+            case STATE_DSTEP_5:
 
                 if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
-                }
-                break;
-            case STATE_TURN_TO_CRATER:
-
-                if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
-                }
-                break;
-            case STATE_STRAFE_TO_WALL:
-
-                if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
-                }
-                break;
-            case STATE_CLEAR_WALL:
-
-                if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
-                }
-                break;
-            case STATE_DRIVE_TO_CRATER:
-
-                if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
-                }
-                break;
-            case STATE_FLUSH_WALL:
-
-                if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
-                }
-                break;
-            case STATE_APPROACH_CRATER:
-
-                if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
+                    stateStepper(State.STATE_STOP);
                 }
                 break;
             case STATE_STOP:
@@ -269,7 +239,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     public boolean sleep(long sleepTime)  {
         runtime.reset();
 
-        while(opModeIsActive() && runtime.milliseconds() <= sleepTime){
+        if(runtime.milliseconds() <= sleepTime){
             return false;
         }
 
