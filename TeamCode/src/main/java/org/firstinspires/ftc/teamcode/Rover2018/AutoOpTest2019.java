@@ -131,8 +131,30 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     private int stateCounter = 0;
     private int currentStep;
     private int currentRoute;
-   // private int[][]
-   // private double[] routeVectors_1 = { }
+
+
+    private double[][] routeVectors = new double[][]
+
+            //Vector positions 0-5 is for Route 1
+
+            {{1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+
+             //Vector positions 6-10 is for Route 2
+                    {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+
+
+    };
+
+    // Steps for driving are sequential 1 - XX
+private int[] routeTimes = new int[]{
+        5000, //Step 1 Time
+        2000,
+        3000,
+        4000,
+        8000,
+
+
+};
 
 
 
@@ -189,6 +211,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                 break;
             case STATE_DRIVE_ROUTE:
 
+
+                Forward_Control(routeVectors[0][0],routeVectors[0][1], routeVectors[0][2],routeTimes[0]);
                 if(sleep(500)) {
                     stateStepper(State.STATE_DSTEP_1);
                 }
