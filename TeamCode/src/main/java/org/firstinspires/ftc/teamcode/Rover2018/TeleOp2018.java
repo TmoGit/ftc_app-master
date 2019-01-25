@@ -48,6 +48,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     //static final double     TURN_SPEED              = 0.5;
 
     public double MOTOR_RUNSPEED = 0.75;
+    public double LIFT_RUNSPEED = 1.0;
     public double SERVO_RUNSPEED_DOWN = 0.25;
     public double SERVO_RUNSPEED_UP   = 0.75;
     public double SERVO_STOP = 0.5;
@@ -506,11 +507,11 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
             //Lift Control
             if (driver2.dpad_up.isPressed()) {
-                Lift_Control(MOTOR_RUNSPEED, 0);
+                Lift_Control(LIFT_RUNSPEED, 0);
                 telemetry.addData("Lift Movement ", "Up");
                 telemetry.update();
             } else if (driver2.dpad_down.isPressed()) {
-                Lift_Control(-(MOTOR_RUNSPEED), 0);
+                Lift_Control(-(LIFT_RUNSPEED), 0);
                 telemetry.addData("Lift Movement ", "DOWN");
                 telemetry.update();
             } else {

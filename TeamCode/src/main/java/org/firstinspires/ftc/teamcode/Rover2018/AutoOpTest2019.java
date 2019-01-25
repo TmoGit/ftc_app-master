@@ -139,7 +139,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     private int stateCounter = 0;
     public int CURRENT_DSTEP = 0;
     public int CURRENT_ROUTE = 1;
-    public int CURRENT_STEP_START =0;
+    public int CURRENT_STEP_START = 0;
     public int CURRENT_TIME_INT = 0;
 
 
@@ -160,25 +160,70 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     };
 
+
+    private int[] stepTimes = new int[]{
+            2000,
+            2000,
+            2000,
+            2000,
+            2000,
+            2000,
+            2000,
+            2000,
+            2000,
+            0
+    };
+
     // Steps for driving are sequential 1 - XX
-private int[] routeTimes = new int[]{
-        5000, 2000, 3000, 4000, 8000,
-        2000, 2000, 2000, 2000, 2000,
-        2000, 2000, 2000, 2000, 2000,
-        2000, 2000, 2000,
+    private int[] routeTimes = new int[]{
+            5000, 2000, 3000, 4000, 8000, 2000,
+            2000, 2000, 2000, 2000, 2000, 2000,
+            2000, 2000, 2000, 2000, 2000, 2000,
+            2000, 2000, 2000, 2000, 2000, 2000
 
 
-};
+    };
 
 
 
+    private boolean stateTimeCheck(boolean isDStep){
+        boolean output = false;
+        int waitTime = 0;
 
-    private void stateStepper(State newState){
+        if(isDStep){
+            for(int i = CURRENT_STEP_START; i < CURRENT_DSTEP; i++) {
+                waitTime += routeTimes[i];
+            }
+        }
+        else {
+            for (int i = 0; i < stateCounter; i++) {
+                waitTime += stepTimes[i];
+            }
+        }
+
+        if(runtime.milliseconds() >= waitTime){
+            output = true;
+        }
+
+        return output;
+    }
 
 
-        currentState = newState;
+    private void stateStepper(State newState, boolean isDStep){
 
-        stateCounter++;
+        if(stateTimeCheck(isDStep)) {
+            currentState = newState;
+
+            if(isDStep) {
+                CURRENT_DSTEP++;
+            }
+            else{
+                stateCounter++;
+            }
+
+        }
+
+
 
     }
 
@@ -190,45 +235,45 @@ private int[] routeTimes = new int[]{
             case STATE_INITIAL:
 
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_MOVE_ARM);
-                }
+
+                    stateStepper(State.STATE_MOVE_ARM, false);
+
                 break;
             case STATE_MOVE_ARM:
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DROP);
-                }
+
+                    stateStepper(State.STATE_DROP, false);
+
                 break;
             case STATE_DROP:
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DETACH_LANDER);
-                }
+
+                    stateStepper(State.STATE_DETACH_LANDER, false);
+
                 break;
             case STATE_DETACH_LANDER:
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_RETRACT_LIFT);
-                }
+
+                    stateStepper(State.STATE_RETRACT_LIFT, false);
+
                 break;
             case STATE_RETRACT_LIFT:
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_RETRACT_ARM);
-                }
+
+                    stateStepper(State.STATE_RETRACT_ARM, false);
+
                 break;
             case STATE_RETRACT_ARM:
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_ESTABLISH_POSITION);
-                }
+
+                    stateStepper(State.STATE_ESTABLISH_POSITION, false);
+
                 break;
             case STATE_ESTABLISH_POSITION:
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DRIVE_ROUTE);
-                }
+
+                    stateStepper(State.STATE_DRIVE_ROUTE, false);
+
                 break;
             case STATE_DRIVE_ROUTE:
 
@@ -237,14 +282,13 @@ private int[] routeTimes = new int[]{
                 CURRENT_DSTEP = CURRENT_STEP_START;
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
                 //Sleep
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DSTEP_1);
-                }
 
-                CURRENT_DSTEP++;
+                    stateStepper(State.STATE_DSTEP_1, true);
+
+
                 break;
 
 
@@ -252,70 +296,65 @@ private int[] routeTimes = new int[]{
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DSTEP_2);
-                }
 
-                CURRENT_DSTEP++;
+                    stateStepper(State.STATE_DSTEP_2, true);
+
+
                 break;
             case STATE_DSTEP_2:
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DSTEP_3);
-                }
 
-                CURRENT_DSTEP++;
+                    stateStepper(State.STATE_DSTEP_3, true);
+
+
                 break;
             case STATE_DSTEP_3:
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DSTEP_4);
-                }
 
-                CURRENT_DSTEP++;
+                    stateStepper(State.STATE_DSTEP_4, true);
+
+
                 break;
             case STATE_DSTEP_4:
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+               // Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_DSTEP_5);
-                }
 
-                CURRENT_DSTEP++;
+                    stateStepper(State.STATE_DSTEP_5, true);
+
+
                 break;
             case STATE_DSTEP_5:
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+               // Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-                if(sleep(500)) {
-                    stateStepper(State.STATE_STOP);
-                }
 
-                CURRENT_DSTEP++;
+                    stateStepper(State.STATE_STOP, true);
+
+
                 break;
             case STATE_STOP:
 
                 //All Stop
-                Forward_Control(0,0, 0,0);
-                if(sleep(500)) {
-                    stateStepper(State.STATE_COMPLETE);
-                }
+               // Forward_Control(0,0, 0,0);
+
+                    stateStepper(State.STATE_COMPLETE, false);
+
                 break;
         }
 
@@ -325,7 +364,8 @@ private int[] routeTimes = new int[]{
 
 
     public boolean sleep(long sleepTime)  {
-        runtime.reset();
+       // runtime.reset();
+
 
         if(runtime.milliseconds() <= sleepTime){
             return false;
@@ -499,6 +539,7 @@ private int[] routeTimes = new int[]{
         telemetry.addData("Current State:", currentState);
         telemetry.addData("State Counter:", stateCounter);
         telemetry.addData("Current Route #", CURRENT_ROUTE);
+        telemetry.addData("Current D-Step", CURRENT_DSTEP);
         telemetry.addData("Current Vector X", currentVector[0]);
         telemetry.addData("Current Vector Y", currentVector[1]);
         telemetry.addData("Current Vector Z", currentVector[2]);
@@ -533,7 +574,7 @@ private int[] routeTimes = new int[]{
     protected void go() {
         isRunning = true;
 
-
+        runtime.reset();
     }
 
     @Override
