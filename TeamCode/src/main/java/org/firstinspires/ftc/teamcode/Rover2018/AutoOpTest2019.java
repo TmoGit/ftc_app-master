@@ -154,6 +154,12 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
             case STATE_INITIAL:
 
                 if(sleep(500)) {
+                    stateStepper(State.STATE_MOVE_ARM);
+                }
+                break;
+            case STATE_MOVE_ARM:
+
+                if(sleep(500)) {
                     stateStepper(State.STATE_DROP);
                 }
                 break;
