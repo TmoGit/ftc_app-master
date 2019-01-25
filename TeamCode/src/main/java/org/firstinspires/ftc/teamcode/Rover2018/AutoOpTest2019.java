@@ -176,7 +176,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     // Steps for driving are sequential 1 - XX
     private int[] routeTimes = new int[]{
-            5000, 2000, 3000, 4000, 8000, 2000,
+            2000, 2000, 3000, 4000, 8000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000
@@ -282,7 +282,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                 CURRENT_DSTEP = CURRENT_STEP_START;
                 getCurrentVector();
 
-              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
                 //Sleep
 
@@ -296,7 +296,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
 
@@ -308,7 +308,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_DSTEP_3, true);
@@ -319,7 +319,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-              //  Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_DSTEP_4, true);
@@ -330,7 +330,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-               // Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_DSTEP_5, true);
@@ -341,7 +341,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-               // Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_STOP, true);
@@ -351,7 +351,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
             case STATE_STOP:
 
                 //All Stop
-               // Forward_Control(0,0, 0,0);
+                Forward_Control(0, 0, 0, 0);
 
                     stateStepper(State.STATE_COMPLETE, false);
 
