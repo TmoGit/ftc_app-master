@@ -102,6 +102,14 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     double gyVal = 0;
     double grVal = 0;
 
+    private double[] currentVector = new double[]{
+
+     //Initialize vectors as 0.0
+            0.0, 0.0, 0.0
+
+    };
+
+
     public int[] TIMELINE = {};
 
     Vector2D XYVector;
@@ -129,10 +137,38 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     private State currentState = State.STATE_INITIAL;
     private int stateCounter = 0;
-    private int currentStep;
-    private int currentRoute;
-   // private int[][]
-   // private double[] routeVectors_1 = { }
+    public int CURRENT_DSTEP = 0;
+    public int CURRENT_ROUTE = 1;
+    public int CURRENT_STEP_START =0;
+    public int CURRENT_TIME_INT = 0;
+
+
+    private double[][] routeVectors = new double[][]
+
+            //Vector positions 0-5 is for Route 1
+
+            {{1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+
+                    //Vector positions 6-11 is for Route 2
+                    {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+
+                    //Vector positions 12-17 is for Route 3
+                    {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+
+                            //Vector positions 18-23 is for Route 4
+                            {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+
+    };
+
+    // Steps for driving are sequential 1 - XX
+private int[] routeTimes = new int[]{
+        5000, 2000, 3000, 4000, 8000,
+        2000, 2000, 2000, 2000, 2000,
+        2000, 2000, 2000, 2000, 2000,
+        2000, 2000, 2000,
+
+
+};
 
 
 
@@ -152,6 +188,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
         switch (currentState){
             case STATE_INITIAL:
+
 
                 if(sleep(500)) {
                     stateStepper(State.STATE_MOVE_ARM);
@@ -195,42 +232,87 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                 break;
             case STATE_DRIVE_ROUTE:
 
+                // Set vectors
+                setDriveStart(CURRENT_ROUTE);
+                CURRENT_DSTEP = CURRENT_STEP_START;
+                getCurrentVector();
+
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+
+                //Sleep
                 if(sleep(500)) {
                     stateStepper(State.STATE_DSTEP_1);
                 }
+
+                CURRENT_DSTEP++;
                 break;
+
+
             case STATE_DSTEP_1:
+
+                getCurrentVector();
+
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+
 
                 if(sleep(500)) {
                     stateStepper(State.STATE_DSTEP_2);
                 }
+
+                CURRENT_DSTEP++;
                 break;
             case STATE_DSTEP_2:
+
+                getCurrentVector();
+
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
                 if(sleep(500)) {
                     stateStepper(State.STATE_DSTEP_3);
                 }
+
+                CURRENT_DSTEP++;
                 break;
             case STATE_DSTEP_3:
+
+                getCurrentVector();
+
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
                 if(sleep(500)) {
                     stateStepper(State.STATE_DSTEP_4);
                 }
+
+                CURRENT_DSTEP++;
                 break;
             case STATE_DSTEP_4:
+
+                getCurrentVector();
+
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
                 if(sleep(500)) {
                     stateStepper(State.STATE_DSTEP_5);
                 }
+
+                CURRENT_DSTEP++;
                 break;
             case STATE_DSTEP_5:
+
+                getCurrentVector();
+
+                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
                 if(sleep(500)) {
                     stateStepper(State.STATE_STOP);
                 }
+
+                CURRENT_DSTEP++;
                 break;
             case STATE_STOP:
 
+                //All Stop
+                Forward_Control(0,0, 0,0);
                 if(sleep(500)) {
                     stateStepper(State.STATE_COMPLETE);
                 }
@@ -312,6 +394,41 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         }
     }
 
+    private void setDriveStart(int ROUTE){
+
+        switch (ROUTE){
+            case 1:
+
+                CURRENT_STEP_START = 0;
+                break;
+
+            case 2:
+
+                CURRENT_STEP_START = 6;
+                break;
+
+            case 3:
+
+                CURRENT_STEP_START = 12;
+                break;
+
+            case 4:
+
+                CURRENT_STEP_START = 18;
+                break;
+        }
+
+    }
+
+    private void getCurrentVector(){
+
+        currentVector[0] = routeVectors[CURRENT_DSTEP][0];
+        currentVector[1] = routeVectors[CURRENT_DSTEP][1];
+        currentVector[2] = routeVectors[CURRENT_DSTEP][2];
+        CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
+
+
+    }
 
     private void Forward_Control(double xVec, double yVec, double rVec, int runTime){
 
@@ -377,8 +494,14 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     }
 
     private void telemetry_update(){
+
+
         telemetry.addData("Current State:", currentState);
         telemetry.addData("State Counter:", stateCounter);
+        telemetry.addData("Current Route #", CURRENT_ROUTE);
+        telemetry.addData("Current Vector X", currentVector[0]);
+        telemetry.addData("Current Vector Y", currentVector[1]);
+        telemetry.addData("Current Vector Z", currentVector[2]);
         telemetry.addData("Runtime:", runtime);
         telemetry.addData("Left Arm Motor ENC VAL:", robotCfg.Motor_LiftLeft.getCurrentPosition());
         telemetry.addData("Right Arm Motor ENC VAL:", robotCfg.Motor_LiftRight.getCurrentPosition());
