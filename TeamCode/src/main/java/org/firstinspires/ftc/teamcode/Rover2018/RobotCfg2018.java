@@ -42,6 +42,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.Hardware;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
 /**
@@ -77,10 +80,20 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelBL = null;
     public DcMotor Motor_WheelBR = null;
 
+    public DcMotor Motor_Sweeper = null;
+
     //Defining Servos
     public CRServo Servo_InL = null;
     public CRServo Servo_InR = null;
     public Servo Servo_Out = null;
+
+    public Servo Servo_Out2 = null;
+
+    //Sensors
+    public BNO055IMU Gyro_Hub = null;
+
+    public Orientation angles;
+    public Acceleration gravity;
 
     public static final double OutUpPos       =  0.0 ;
     public static final double OutDumpPos    =  0.45 ;
@@ -167,12 +180,18 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
 
+        Motor_Sweeper = hardwareMap.get(DcMotor.class, "Motor_Sweeper");
+
         //This is where we intilize the servos
         Servo_InR = hardwareMap.get(CRServo.class, "Servo_InR");
         Servo_InL = hardwareMap.get(CRServo.class, "Servo_InL");
         Servo_Out = hardwareMap.get(Servo.class, "Servo_Out");
 
+        Servo_Out2 = hardwareMap.get(Servo.class, "Servo_Out2");
 
+        //Sensors
+
+        Gyro_Hub = hardwareMap.get(BNO055IMU.class, "Gyro_Hub");
 
 
         //Reset Encoders
@@ -184,6 +203,8 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        Motor_Sweeper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         // Run using encoders
         Motor_ArmBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_LiftLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -192,6 +213,10 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_WheelFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_WheelBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        Motor_Sweeper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
 
 
 //        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();

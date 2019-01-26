@@ -41,6 +41,26 @@ import ftc.evlib.hardware.control.RotationControls;
 import ftc.evlib.hardware.control.TranslationControls;
 import ftc.evlib.opmodes.AbstractFixedAutoOp;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.Hardware;
+
+import org.firstinspires.ftc.robotcore.external.navigation.*;
+
+import java.util.Locale;
+
+
+
 /**
  * This file was made by Cut The Red Wire, FTC team 6078
  */
@@ -102,6 +122,13 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     double gyVal = 0;
     double grVal = 0;
 
+    public double rawHeading;
+
+
+
+
+
+
     private double[] currentVector = new double[]{
 
      //Initialize vectors as 0.0
@@ -147,7 +174,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
             //Vector positions 0-5 is for Route 1
 
-            {{1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+            {{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0,3.0,4.5}, {1.0,3.0,4.5}, {1.0,3.0,4.5}, {1.0,3.0,4.5}, {1.0,3.0,4.5},
 
                     //Vector positions 6-11 is for Route 2
                     {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
@@ -176,7 +203,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     // Steps for driving are sequential 1 - XX
     private int[] routeTimes = new int[]{
-            2000, 2000, 3000, 4000, 8000, 2000,
+            4000, 4000, 4000, 6000, 4000, 4000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000
@@ -185,19 +212,37 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     };
 
 
+    public double rangeClipDouble(double input, double min, double max){
+        double output = input;
+
+        if(input > max){
+            output = max;
+        }
+        else if(input < min){
+            output = min;
+        }
+
+        return output;
+    }
+
+    public double getGyroHeading(Orientation angles){
+        rawHeading = -AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
+
+        return rawHeading;
+    }
 
     private boolean stateTimeCheck(boolean isDStep){
         boolean output = false;
         int waitTime = 0;
 
-        if(isDStep){
+
+        for (int i = 0; i < stateCounter; i++) {
+            waitTime += stepTimes[i];
+        }
+
+        if(isDStep) {
             for(int i = CURRENT_STEP_START; i < CURRENT_DSTEP; i++) {
                 waitTime += routeTimes[i];
-            }
-        }
-        else {
-            for (int i = 0; i < stateCounter; i++) {
-                waitTime += stepTimes[i];
             }
         }
 
@@ -282,7 +327,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                 CURRENT_DSTEP = CURRENT_STEP_START;
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
                 //Sleep
 
@@ -296,8 +341,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
-
+                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                driveControl(currentVector[0], currentVector[1], currentVector[2], true);
 
 
                     stateStepper(State.STATE_DSTEP_2, true);
@@ -308,7 +353,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_DSTEP_3, true);
@@ -319,7 +364,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_DSTEP_4, true);
@@ -330,7 +375,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_DSTEP_5, true);
@@ -341,7 +386,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
                 getCurrentVector();
 
-                Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
                     stateStepper(State.STATE_STOP, true);
@@ -351,7 +396,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
             case STATE_STOP:
 
                 //All Stop
-                Forward_Control(0, 0, 0, 0);
+                //Forward_Control(0, 0, 0, 0);
+                driveControl(0,0,0, false);
 
                     stateStepper(State.STATE_COMPLETE, false);
 
@@ -480,7 +526,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         gyVal = yVec;
         grVal = rVec;
 
-        runtime.reset();
+       // runtime.reset();
 
         InputExtractor<Double> x = new InputExtractor<Double>() {
             @Override
@@ -508,7 +554,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         rightY = new ScalingInputExtractor(y, 1);
         leftX = new ScalingInputExtractor(r, 1);
 
-        while(opModeIsActive() && runtime.milliseconds() <= runTime) {
+
+        if(stateTimeCheck(true) == false) {
             robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
 //          robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
             robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
@@ -524,6 +571,48 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         gxVal = 0;
         gyVal = 0;
         grVal = 0;
+    }
+
+
+    private void driveControl(double speed, double direction, double rotation, boolean isDStep) {
+        double x = rangeClipDouble(speed, -1, 1);
+        double y = rangeClipDouble(direction, -1, 1);
+        double z = rangeClipDouble(rotation, -1, 1);
+
+
+
+        robotCfg.angles = robotCfg.Gyro_Hub.getAngularOrientation(
+                AxesReference.INTRINSIC, AxesOrder.XYX, AngleUnit.DEGREES);
+
+        double angle = getGyroHeading(robotCfg.angles);
+
+        double cosA = Math.cos(Math.toRadians(angle));
+        double sinA = Math.sin(Math.toRadians(angle));
+        double x1 = x * cosA - y * sinA;
+        double y1 = x * sinA + y * cosA;
+
+        double[] wheelPowers = new double[4];
+
+        wheelPowers[0] = x1 + y1 + z;
+        wheelPowers[1] = -x1 + y1 - z;
+        wheelPowers[2] = -x1 + y1 + z;
+        wheelPowers[3] = x1 + y1 - z;
+
+        if (stateTimeCheck(isDStep) == false) {
+            robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
+            robotCfg.Motor_WheelFL.setPower(wheelPowers[1]);
+            robotCfg.Motor_WheelFL.setPower(wheelPowers[2]);
+            robotCfg.Motor_WheelFL.setPower(wheelPowers[3]);
+        }
+
+        //remove this
+        telemetry.addData("FL Power:", wheelPowers[0]);
+        telemetry.addData("FR Power:", wheelPowers[1]);
+        telemetry.addData("BL Power:", wheelPowers[2]);
+        telemetry.addData("BR Power:", wheelPowers[3]);
+
+        telemetry.update();
+
     }
 
     private void main_run(){
@@ -548,9 +637,85 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         telemetry.addData("Right Arm Motor ENC VAL:", robotCfg.Motor_LiftRight.getCurrentPosition());
         telemetry.addData("Wheel FL Motor ENC VAL:", robotCfg.Motor_WheelFL.getCurrentPosition());
 
+        //composeTelemetry();
 
         telemetry.update();
     }
+
+
+    void composeTelemetry() {
+
+        // At the beginning of each telemetry update, grab a bunch of data
+        // from the IMU that we will then display in separate lines.
+        telemetry.addAction(new Runnable() { @Override public void run()
+        {
+            // Acquiring the angles is relatively expensive; we don't want
+            // to do that in each of the three items that need that info, as that's
+            // three times the necessary expense.
+            robotCfg.angles   = robotCfg.Gyro_Hub.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            robotCfg.gravity  = robotCfg.Gyro_Hub.getGravity();
+        }
+        });
+
+
+        telemetry.addData("status", new Func<String>() {
+                    @Override public String value() {
+                        return robotCfg.Gyro_Hub.getSystemStatus().toShortString();
+                    }
+                });
+        telemetry.addData("calib", new Func<String>() {
+                    @Override public String value() {
+                        return robotCfg.Gyro_Hub.getCalibrationStatus().toString();
+                    }
+                });
+
+
+        telemetry.addData("heading", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(robotCfg.angles.angleUnit, robotCfg.angles.firstAngle);
+                    }
+                });
+        telemetry.addData("roll", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(robotCfg.angles.angleUnit, robotCfg.angles.secondAngle);
+                    }
+                });
+        telemetry.addData("pitch", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(robotCfg.angles.angleUnit, robotCfg.angles.thirdAngle);
+                    }
+                });
+
+
+        telemetry.addData("grvty", new Func<String>() {
+                    @Override public String value() {
+                        return robotCfg.gravity.toString();
+    }
+});
+        telemetry.addData("mag", new Func<String>() {
+                    @Override public String value() {
+                        return String.format(Locale.getDefault(), "%.3f",
+                                Math.sqrt(robotCfg.gravity.xAccel*robotCfg.gravity.xAccel
+                                        + robotCfg.gravity.yAccel*robotCfg.gravity.yAccel
+                                        + robotCfg.gravity.zAccel*robotCfg.gravity.zAccel));
+                    }
+                });
+    }
+
+    //----------------------------------------------------------------------------------------------
+    // Formatting
+    //----------------------------------------------------------------------------------------------
+
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    String formatDegrees(double degrees){
+        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+
+
 
 
     @Override
@@ -565,6 +730,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     @Override
     protected void act() {
+        robotCfg.Gyro_Hub.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
         main_run();
 
         telemetry_update();
@@ -573,6 +740,17 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     @Override
     protected void go() {
         isRunning = true;
+
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        robotCfg.Gyro_Hub.initialize(parameters);
 
         runtime.reset();
     }
