@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.files.Logger;
+import ftc.evlib.hardware.config.RobotCfg;
 import ftc.evlib.hardware.control.RotationControls;
 import ftc.evlib.hardware.control.TranslationControls;
 import ftc.evlib.opmodes.AbstractFixedAutoOp;
@@ -172,23 +173,53 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     private double[][] routeVectors = new double[][]
 
+             /*
+        Route 1	          Route 2	              Route 3	       Route 4
+0 - Drive Step 1	6 - Drive Step 7	12 - Drive Step 13	18 - Drive Step 19
+1 - Drive Step 2	7 - Drive Step 8	13 - Drive Step 14	19 - Drive Step 20
+2 - Drive Step 3	8 - Drive Step 9	14 - Drive Step 15	20 - Drive Step 21
+3 - Drive Step 4	9 - Drive Step 10	15 - Drive Step 16	21 - Drive Step 22
+4 - Drive Step 5	10 -Drive Step 11	16 - Drive Step 17	22 - Drive Step 23
+5 - Drive Step 6	11- Drive Step 12	17 - Drive Step 18	23 - Drive Step 24
+
+        Direction
+	F	L	R	B	HL	HR
+
+Motor Output
+FL	1	1	-1	-1	1	0
+FR	-1	1	-1	1	-1	0
+BL	-1	1	-1	1	0	-1
+Br	1	1	-1	-1	0	-1
+
+Vector Input
+X	1	0	0	-1	1	1
+Y	0	1	-1	0	0	0
+Z	0	0	0	0	1	-1
+
+4 Vector array element is magnitude i.e. distance in inches
+
+
+
+*/
+
             //Vector positions 0-5 is for Route 1
 
-            {{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0,3.0,4.5}, {1.0,3.0,4.5}, {1.0,3.0,4.5}, {1.0,3.0,4.5}, {1.0,3.0,4.5},
+            {{1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                     //Vector positions 6-11 is for Route 2
-                    {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+                    {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                     //Vector positions 12-17 is for Route 3
-                    {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+                    {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                             //Vector positions 18-23 is for Route 4
-                            {1.0,2.0,3.0}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5}, {2.0,3.0,4.5},
+                    {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
     };
 
 
     private int[] stepTimes = new int[]{
+            // Sequencer step intervals, these need to match drive step times and equal 30s
             2000,
             2000,
             2000,
@@ -203,6 +234,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     // Steps for driving are sequential 1 - XX
     private int[] routeTimes = new int[]{
+            // Drive intervals need to equal up to 30s - time to execute other steps
             4000, 4000, 4000, 6000, 4000, 4000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000,
@@ -213,6 +245,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
 
     public double rangeClipDouble(double input, double min, double max){
+        //Used for range clipping
         double output = input;
 
         if(input > max){
@@ -226,12 +259,14 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     }
 
     public double getGyroHeading(Orientation angles){
+        //Formats Gyro reading into Degrees
         rawHeading = -AngleUnit.DEGREES.fromUnit(angles.angleUnit, angles.firstAngle);
 
         return rawHeading;
     }
 
     private boolean stateTimeCheck(boolean isDStep){
+        //Used for checking drive step time intervals
         boolean output = false;
         int waitTime = 0;
 
@@ -255,7 +290,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
 
     private void stateStepper(State newState, boolean isDStep){
-
+        // Steps sequencer
         if(stateTimeCheck(isDStep)) {
             currentState = newState;
 
@@ -273,6 +308,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     }
 
     private void stateCall(){
+        // Main State Sequencer
         telemetry.addData("Current State:", currentState);
         telemetry.update();
 
@@ -342,11 +378,11 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                 getCurrentVector();
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
-                driveControl(currentVector[0], currentVector[1], currentVector[2], true);
+              if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
 
 
-                    stateStepper(State.STATE_DSTEP_2, true);
-
+                stateStepper(State.STATE_DSTEP_2, true);
+            }
 
                 break;
             case STATE_DSTEP_2:
@@ -396,8 +432,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
             case STATE_STOP:
 
                 //All Stop
-                //Forward_Control(0, 0, 0, 0);
-                driveControl(0,0,0, false);
+
+                driveAllStop();
 
                     stateStepper(State.STATE_COMPLETE, false);
 
@@ -408,7 +444,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     }
 
 
-
+/*
+Dead code
     public boolean sleep(long sleepTime)  {
        // runtime.reset();
 
@@ -420,12 +457,12 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
         return true;
     }
-
+*/
     public boolean opModeIsActive(){
         return isRunning;
     }
 
-
+//No longer used - technically dead code
     class ScalingInputExtractor implements InputExtractor<Double> {
         InputExtractor<Double> ext;
         private double factor;
@@ -481,6 +518,17 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     }
 
     private void setDriveStart(int ROUTE){
+        // Drive steps based on routes
+ /*
+        Route 1	          Route 2	              Route 3	       Route 4
+0 - Drive Step 1	6 - Drive Step 7	12 - Drive Step 13	18 - Drive Step 19
+1 - Drive Step 2	7 - Drive Step 8	13 - Drive Step 14	19 - Drive Step 20
+2 - Drive Step 3	8 - Drive Step 9	14 - Drive Step 15	20 - Drive Step 21
+3 - Drive Step 4	9 - Drive Step 10	15 - Drive Step 16	21 - Drive Step 22
+4 - Drive Step 5	10 -Drive Step 11	16 - Drive Step 17	22 - Drive Step 23
+5 - Drive Step 6	11- Drive Step 12	17 - Drive Step 18	23 - Drive Step 24
+
+*/
 
         switch (ROUTE){
             case 1:
@@ -507,7 +555,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     }
 
     private void getCurrentVector(){
-
+        // Pulls down Vectors from array
         currentVector[0] = routeVectors[CURRENT_DSTEP][0];
         currentVector[1] = routeVectors[CURRENT_DSTEP][1];
         currentVector[2] = routeVectors[CURRENT_DSTEP][2];
@@ -515,7 +563,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
 
     }
-
+/*
+    Dead Code
     private void Forward_Control(double xVec, double yVec, double rVec, int runTime){
 
         ScalingInputExtractor rightY;
@@ -572,58 +621,166 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         gyVal = 0;
         grVal = 0;
     }
+*/
+    public void driveAllStop(){
+        //Stops and resets encoders
 
+        robotCfg.Motor_WheelFL.setPower(0);
+        robotCfg.Motor_WheelFR.setPower(0);
+        robotCfg.Motor_WheelBL.setPower(0);
+        robotCfg.Motor_WheelBR.setPower(0);
 
-    private void driveControl(double speed, double direction, double rotation, boolean isDStep) {
+        robotCfg.Motor_WheelFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robotCfg.Motor_WheelFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robotCfg.Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robotCfg.Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
+
+    private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, boolean isDStep) {
+        //Main Drive Routine
+
         double x = rangeClipDouble(speed, -1, 1);
-        double y = rangeClipDouble(direction, -1, 1);
+        double y = rangeClipDouble(direction_speed, -1, 1);
         double z = rangeClipDouble(rotation, -1, 1);
+        int[] current_pos = new int[]{0,0,0,0};
+        int[] target_pos = new int[]{0,0,0,0};
+        int[] error_pos = new int[]{0,0,0,0};
 
+        //Capture all encoder values, only use back wheel of robot for encoder value
+        current_pos[0] = robotCfg.Motor_WheelFL.getCurrentPosition();
+        target_pos[0] = robotCfg.Motor_WheelFL.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        error_pos[0] = Math.abs(target_pos[0] - current_pos[0]);
 
+        current_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition();
+        target_pos[1] = robotCfg.Motor_WheelFR.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        error_pos[1] = Math.abs(target_pos[1] - current_pos[1]);
+
+        current_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition();
+        target_pos[2] = robotCfg.Motor_WheelBL.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        error_pos[2] = Math.abs(target_pos[2] - current_pos[2]);
+
+        current_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition();
+        target_pos[3] = robotCfg.Motor_WheelBR.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        error_pos[3] = Math.abs(target_pos[3] - current_pos[3]);
+
+        /*
+        Dead Code
+        double V_1 = 0;
+        double V_2 = 0;
+        double V_3 = 0;
+        double V_4 = 0;
+        double Vd = speed;
+        double Td = Math.toRadians(rotation);
+        double Td_Comp = 0;
+        double Vt = 1;
+        */
 
         robotCfg.angles = robotCfg.Gyro_Hub.getAngularOrientation(
                 AxesReference.INTRINSIC, AxesOrder.XYX, AngleUnit.DEGREES);
 
         double angle = getGyroHeading(robotCfg.angles);
 
+
+
+/*
+        //Equations for wheel power
+        Reference Only
+        V_1 = Vd * Math.sin(-Td + (Math.PI / 4)) - Vt;
+        V_2 = Vd * Math.cos(-Td + (Math.PI / 4)) + Vt;
+        V_3 = Vd * Math.cos(-Td + (Math.PI / 4)) - Vt;
+        V_4 = Vd * Math.sin(-Td + (Math.PI / 4)) + Vt;
+*/
         double cosA = Math.cos(Math.toRadians(angle));
         double sinA = Math.sin(Math.toRadians(angle));
         double x1 = x * cosA - y * sinA;
         double y1 = x * sinA + y * cosA;
 
         double[] wheelPowers = new double[4];
+/*
+        Dead Code
+        wheelPowers[0] = V_1;
+        wheelPowers[1] = V_2;
+        wheelPowers[2] = V_3;
+        wheelPowers[3] = V_4;
+        */
 
-        wheelPowers[0] = x1 + y1 + z;
-        wheelPowers[1] = -x1 + y1 - z;
-        wheelPowers[2] = -x1 + y1 + z;
-        wheelPowers[3] = x1 + y1 - z;
+        //Gyro compensation NOT READY
+       // if (z==0){
+         //   z = getCompensation(angle);
+        //}
 
-        if (stateTimeCheck(isDStep) == false) {
+        //Range clipped power to motors
+        wheelPowers[0] = rangeClipDouble((x1 + y1 + z),-1,1);
+        wheelPowers[1] = rangeClipDouble(( -x1 + y1 - z),-1,1);
+        wheelPowers[2] = rangeClipDouble((-x1 + y1 + z),-1,1);
+        wheelPowers[3] = rangeClipDouble((x1 + y1 - z),-1,1);
+
+
+
+        //Check time and distance
+        if ((!stateTimeCheck(isDStep)) || !(current_pos[2] >= target_pos[2])){
             robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
-            robotCfg.Motor_WheelFL.setPower(wheelPowers[1]);
-            robotCfg.Motor_WheelFL.setPower(wheelPowers[2]);
-            robotCfg.Motor_WheelFL.setPower(wheelPowers[3]);
+            robotCfg.Motor_WheelFR.setPower(wheelPowers[1]);
+            robotCfg.Motor_WheelBL.setPower(wheelPowers[2]);
+            robotCfg.Motor_WheelBR.setPower(wheelPowers[3]);
+
+        }
+        else{
+
+            driveAllStop();
+
         }
 
-        //remove this
+        //remove this after debug
         telemetry.addData("FL Power:", wheelPowers[0]);
         telemetry.addData("FR Power:", wheelPowers[1]);
         telemetry.addData("BL Power:", wheelPowers[2]);
         telemetry.addData("BR Power:", wheelPowers[3]);
+        telemetry.addData("Target Position:", target_pos[2]);
+        telemetry.addData("Current Position:", current_pos[2]);
+        telemetry.addData("Distance Error:", error_pos[2]);
 
         telemetry.update();
+        return true;
 
     }
 
-    private void main_run(){
+    double getCompensation(double TARGET_HEADING) {
+        //Heading compensation, this is not implemented
+        double rotation = 0.0;
+        double currentHeading = getGyroHeading(robotCfg.angles);
+        double targetHeading = TARGET_HEADING;
+        double posError = currentHeading - targetHeading;
+        double epsilon = 3;
+        double minSpeed = .35;
+        double maxSpeed = 0.5;//1
 
+
+        if (Math.abs(posError) > 180) {
+            posError = -360 * Math.signum(posError) + posError;
+        }
+        if (Math.abs(posError) > epsilon) {
+            rotation = minSpeed + (Math.abs(posError) / 180) * (maxSpeed - minSpeed);
+            rotation = rotation * Math.signum(posError);
+        }
+
+
+
+        return rotation;
+    }
+
+/*Not needed - Dead Code
+    private void main_run(){
+        //Main Loop
 
         stateCall();
 
     }
+    */
 
     private void telemetry_update(){
-
+     // Telemetry writes, can remove for competition
 
         telemetry.addData("Current State:", currentState);
         telemetry.addData("State Counter:", stateCounter);
@@ -642,7 +799,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         telemetry.update();
     }
 
-
+/*
+Dead code
     void composeTelemetry() {
 
         // At the beginning of each telemetry update, grab a bunch of data
@@ -702,6 +860,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                 });
     }
 
+    */
+
     //----------------------------------------------------------------------------------------------
     // Formatting
     //----------------------------------------------------------------------------------------------
@@ -730,15 +890,19 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     @Override
     protected void act() {
+        //Main routine
         robotCfg.Gyro_Hub.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-        main_run();
+       // main_run();
+        stateCall();
 
         telemetry_update();
     }
 
     @Override
     protected void go() {
+        //First run, initialization
+
         isRunning = true;
 
 
@@ -755,6 +919,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
         runtime.reset();
     }
 
+    //Placeholder for logger, needed for class
     @Override
     protected Logger createLogger() {
         return null;
