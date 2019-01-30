@@ -117,6 +117,9 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     static final double     TURN_SPEED              = 0.5;
     boolean isRunning = false;
     boolean isStepping = false;
+    boolean liftFirst = true;
+
+    int liftEndTime = 0;
 
 
     double gxVal = 0;
@@ -133,7 +136,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     private double[] currentVector = new double[]{
 
      //Initialize vectors as 0.0
-            0.0, 0.0, 0.0, 0.0
+            0.0, 0.0, 0.0
 
     };
 
@@ -378,11 +381,9 @@ Z	0	0	0	0	1	-1
                 getCurrentVector();
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
-              if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
-
-
-                stateStepper(State.STATE_DSTEP_2, true);
-            }
+                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
+                    stateStepper(State.STATE_DSTEP_2, true);
+                }
 
                 break;
             case STATE_DSTEP_2:
@@ -480,8 +481,24 @@ Dead code
     }
 
 
-    private void Lift_Control(double power, double inchDist) {
-        
+    private boolean Lift_Control(double power, int liftTime) {
+            //Only controls drop/hook lift
+            int currentTime = (int) runtime.milliseconds();
+
+            if(liftFirst){
+                liftEndTime = currentTime + liftTime;
+                liftFirst = false;
+            }
+            
+            if(currentTime < liftEndTime) {
+                robotCfg.Motor_LiftLeft.setPower(power);
+            } else {
+                robotCfg.Motor_LiftLeft.setPower(0);
+                liftFirst = true;
+                liftEndTime = 0;
+            }
+
+            return true;
     }
 
     private void setDriveStart(int ROUTE){
@@ -526,8 +543,6 @@ Dead code
         currentVector[0] = routeVectors[CURRENT_DSTEP][0];
         currentVector[1] = routeVectors[CURRENT_DSTEP][1];
         currentVector[2] = routeVectors[CURRENT_DSTEP][2];
-        currentVector[3] = routeVectors[CURRENT_DSTEP][3];
-
         CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
 
 
@@ -606,14 +621,6 @@ Dead code
 
     }
 
-    public void resetEncoders(){
-        robotCfg.Motor_WheelFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robotCfg.Motor_WheelFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robotCfg.Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robotCfg.Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-    }
-
     private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, boolean isDStep) {
         //Main Drive Routine
 
@@ -626,22 +633,20 @@ Dead code
 
         //Capture all encoder values, only use back wheel of robot for encoder value
         current_pos[0] = robotCfg.Motor_WheelFL.getCurrentPosition();
-        target_pos[0] = robotCfg.Motor_WheelFL.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        target_pos[0] = robotCfg.Motor_WheelFL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
         error_pos[0] = Math.abs(target_pos[0] - current_pos[0]);
 
         current_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition();
-        target_pos[1] = robotCfg.Motor_WheelFR.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        target_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
         error_pos[1] = Math.abs(target_pos[1] - current_pos[1]);
 
-        current_pos[2] = -robotCfg.Motor_WheelBL.getCurrentPosition();
-        target_pos[2] = robotCfg.Motor_WheelBL.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        current_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition();
+        target_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
         error_pos[2] = Math.abs(target_pos[2] - current_pos[2]);
 
         current_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition();
-        target_pos[3] = robotCfg.Motor_WheelBR.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        target_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
         error_pos[3] = Math.abs(target_pos[3] - current_pos[3]);
-
-
 
         /*
         Dead Code
