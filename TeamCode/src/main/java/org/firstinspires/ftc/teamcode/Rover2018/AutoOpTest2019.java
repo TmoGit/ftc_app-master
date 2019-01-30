@@ -323,9 +323,9 @@ Z	0	0	0	0	1	-1
             case STATE_INITIAL:
 
 
-                if(pinRelease(1750)) {
+              //  if(pinRelease(1750)) {
                     stateStepper(State.STATE_MOVE_ARM, false);
-                }
+               // }
                 break;
             case STATE_MOVE_ARM:
 
