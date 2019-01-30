@@ -133,7 +133,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     private double[] currentVector = new double[]{
 
      //Initialize vectors as 0.0
-            0.0, 0.0, 0.0
+            0.0, 0.0, 0.0, 0.0
 
     };
 
@@ -480,41 +480,8 @@ Dead code
     }
 
 
-    private void Lift_Control(double power, double inchDist, int controlState) {
-        if (controlState == 0) {
-            robotCfg.Motor_LiftRight.setPower(power);
-            robotCfg.Motor_LiftLeft.setPower(-power);
-        } else if (controlState == 1) {
-            int newLiftLeftTarget = 0;
-            int newLiftRightTarget = 0;
-
-            newLiftLeftTarget = robotCfg.Motor_LiftLeft.getCurrentPosition() + (int) (-inchDist * COUNTS_PER_INCH);
-            newLiftRightTarget = robotCfg.Motor_LiftRight.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
-
-
-            robotCfg.Motor_LiftLeft.setTargetPosition(newLiftLeftTarget);
-            robotCfg.Motor_LiftRight.setTargetPosition(newLiftRightTarget);
-
-            // Turn On RUN_TO_POSITION
-            robotCfg.Motor_LiftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            robotCfg.Motor_LiftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // Move to position
-            while (robotCfg.Motor_LiftLeft.getCurrentPosition() != newLiftLeftTarget && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget && opModeIsActive()) {
-                robotCfg.Motor_LiftLeft.setPower(power);
-                robotCfg.Motor_LiftRight.setPower(-power);
-
-
-                telemetry.addData("Lift Left Motor ENC VAL: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
-                telemetry.addData("Lift Right Motor ENC VAL: ", robotCfg.Motor_LiftRight.getCurrentPosition());
-                telemetry.update();
-            }
-            if (robotCfg.Motor_LiftLeft.getCurrentPosition() >= newLiftLeftTarget && robotCfg.Motor_LiftRight.getCurrentPosition() != newLiftRightTarget) {
-                robotCfg.Motor_LiftRight.setPower(0);
-                robotCfg.Motor_LiftLeft.setPower(0);
-            }
-
-        }
+    private void Lift_Control(double power, double inchDist) {
+        
     }
 
     private void setDriveStart(int ROUTE){
@@ -559,6 +526,8 @@ Dead code
         currentVector[0] = routeVectors[CURRENT_DSTEP][0];
         currentVector[1] = routeVectors[CURRENT_DSTEP][1];
         currentVector[2] = routeVectors[CURRENT_DSTEP][2];
+        currentVector[3] = routeVectors[CURRENT_DSTEP][3];
+
         CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
 
 
@@ -637,6 +606,14 @@ Dead code
 
     }
 
+    public void resetEncoders(){
+        robotCfg.Motor_WheelFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robotCfg.Motor_WheelFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robotCfg.Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robotCfg.Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+    }
+
     private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, boolean isDStep) {
         //Main Drive Routine
 
@@ -656,13 +633,15 @@ Dead code
         target_pos[1] = robotCfg.Motor_WheelFR.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
         error_pos[1] = Math.abs(target_pos[1] - current_pos[1]);
 
-        current_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition();
+        current_pos[2] = -robotCfg.Motor_WheelBL.getCurrentPosition();
         target_pos[2] = robotCfg.Motor_WheelBL.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
         error_pos[2] = Math.abs(target_pos[2] - current_pos[2]);
 
         current_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition();
         target_pos[3] = robotCfg.Motor_WheelBR.getTargetPosition() + (int) (inchDist * COUNTS_PER_INCH);
         error_pos[3] = Math.abs(target_pos[3] - current_pos[3]);
+
+
 
         /*
         Dead Code
