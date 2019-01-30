@@ -79,15 +79,14 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelFR = null;
     public DcMotor Motor_WheelBL = null;
     public DcMotor Motor_WheelBR = null;
-
     public DcMotor Motor_Sweeper = null;
 
     //Defining Servos
     public CRServo Servo_InL = null;
     public CRServo Servo_InR = null;
     public Servo Servo_Out = null;
-
     public Servo Servo_Out2 = null;
+    public Servo Servo_Pin = null;
 
     //Sensors
     public BNO055IMU Gyro_Hub = null;
@@ -171,7 +170,6 @@ public class RobotCfg2018 extends RobotCfg {
      //   servos=new Servos(ServoCfg.createServoMap(hardwareMap, servoStartPresetMap));
 
         //This is where we intilize the motors
-
         Motor_WheelFL = hardwareMap.get(DcMotor.class, "Motor_WheelFL");
         Motor_WheelFR = hardwareMap.get(DcMotor.class, "Motor_WheelFR");
         Motor_WheelBL = hardwareMap.get(DcMotor.class, "Motor_WheelBL ");
@@ -179,18 +177,16 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_ArmBase = hardwareMap.get(DcMotor.class, "Motor_ArmBase");
         Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
-
         Motor_Sweeper = hardwareMap.get(DcMotor.class, "Motor_Sweeper");
 
         //This is where we intilize the servos
         Servo_InR = hardwareMap.get(CRServo.class, "Servo_InR");
         Servo_InL = hardwareMap.get(CRServo.class, "Servo_InL");
         Servo_Out = hardwareMap.get(Servo.class, "Servo_Out");
-
         Servo_Out2 = hardwareMap.get(Servo.class, "Servo_Out2");
+        Servo_Pin = hardwareMap.get(Servo.class, "Servo_Pin");
 
         //Sensors
-
         Gyro_Hub = hardwareMap.get(BNO055IMU.class, "Gyro_Hub");
 
 

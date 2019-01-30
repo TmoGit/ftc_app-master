@@ -115,11 +115,15 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
                                                       (WHEEL_DIAMETER_INCHES * 3.1415);
     static final double     MOTOR_RUNSPEED            = 0.75;
     static final double     TURN_SPEED              = 0.5;
+    static final double     SERVO_STOP              = 0.5;
     boolean isRunning = false;
     boolean isStepping = false;
-    boolean liftFirst = true;
 
+    boolean liftFirst = true;
     int liftEndTime = 0;
+
+    boolean pinFirst = true;
+    int pinEndTime = 0;
 
 
     double gxVal = 0;
@@ -136,7 +140,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     private double[] currentVector = new double[]{
 
      //Initialize vectors as 0.0
-            0.0, 0.0, 0.0
+            0.0, 0.0, 0.0, 0.0
 
     };
 
@@ -207,7 +211,7 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+            {{1.0, 0.0, 0.0, 4.0}, {0.0, -1.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                     //Vector positions 6-11 is for Route 2
                     {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
@@ -224,8 +228,8 @@ Z	0	0	0	0	1	-1
     private int[] stepTimes = new int[]{
             // Sequencer step intervals, these need to match drive step times and equal 30s
             2000,
-            2000,
-            2000,
+            0,
+            4000,
             2000,
             2000,
             2000,
@@ -238,7 +242,7 @@ Z	0	0	0	0	1	-1
     // Steps for driving are sequential 1 - XX
     private int[] routeTimes = new int[]{
             // Drive intervals need to equal up to 30s - time to execute other steps
-            4000, 4000, 4000, 6000, 4000, 4000,
+            2000, 4000, 4000, 6000, 4000, 4000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000
@@ -319,9 +323,9 @@ Z	0	0	0	0	1	-1
             case STATE_INITIAL:
 
 
-
+                if(pinRelease(1750)) {
                     stateStepper(State.STATE_MOVE_ARM, false);
-
+                }
                 break;
             case STATE_MOVE_ARM:
 
@@ -331,8 +335,9 @@ Z	0	0	0	0	1	-1
                 break;
             case STATE_DROP:
 
-
+                if(Lift_Control(0.5, 3000)) {
                     stateStepper(State.STATE_DETACH_LANDER, false);
+                }
 
                 break;
             case STATE_DETACH_LANDER:
@@ -380,9 +385,11 @@ Z	0	0	0	0	1	-1
 
                 getCurrentVector();
 
-                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
+
                 if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
-                    stateStepper(State.STATE_DSTEP_2, true);
+                    if(!robotCfg.Motor_WheelBL.isBusy()) {
+                        stateStepper(State.STATE_DSTEP_2, true);
+                    }
                 }
 
                 break;
@@ -392,9 +399,11 @@ Z	0	0	0	0	1	-1
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-
-                    stateStepper(State.STATE_DSTEP_3, true);
-
+               // if (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true)) {
+                //      if(!robotCfg.Motor_WheelBL.isBusy()) {
+                          stateStepper(State.STATE_DSTEP_3, true);
+                 //     }
+               // }
 
                 break;
             case STATE_DSTEP_3:
@@ -480,25 +489,55 @@ Dead code
         }
     }
 
+    private boolean pinRelease(int moveTime){
+        int currentTime = (int) runtime.milliseconds();
+        boolean output = false;
+
+
+        if(pinFirst){
+            pinEndTime = currentTime + moveTime;
+            pinFirst = false;
+        }
+
+        if(currentTime < pinEndTime) {
+            robotCfg.Servo_Pin.setPosition(1.0);
+        } else {
+            robotCfg.Servo_Pin.setPosition(SERVO_STOP);
+            pinFirst = true;
+            pinEndTime = 0;
+            output = true;
+        }
+
+
+
+
+        return output;
+    }
 
     private boolean Lift_Control(double power, int liftTime) {
             //Only controls drop/hook lift
             int currentTime = (int) runtime.milliseconds();
+            boolean output = false;
+
 
             if(liftFirst){
                 liftEndTime = currentTime + liftTime;
                 liftFirst = false;
             }
-            
+
             if(currentTime < liftEndTime) {
-                robotCfg.Motor_LiftLeft.setPower(power);
+                robotCfg.Motor_LiftLeft.setPower(-power);
             } else {
                 robotCfg.Motor_LiftLeft.setPower(0);
                 liftFirst = true;
                 liftEndTime = 0;
+                output = true;
             }
 
-            return true;
+
+
+
+            return output;
     }
 
     private void setDriveStart(int ROUTE){
@@ -543,8 +582,8 @@ Dead code
         currentVector[0] = routeVectors[CURRENT_DSTEP][0];
         currentVector[1] = routeVectors[CURRENT_DSTEP][1];
         currentVector[2] = routeVectors[CURRENT_DSTEP][2];
+        currentVector[3] = routeVectors[CURRENT_DSTEP][3];
         CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
-
 
     }
 /*
@@ -623,6 +662,7 @@ Dead code
 
     private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, boolean isDStep) {
         //Main Drive Routine
+        boolean output = false;
 
         double x = rangeClipDouble(speed, -1, 1);
         double y = rangeClipDouble(direction_speed, -1, 1);
@@ -711,6 +751,7 @@ Dead code
 
         }
         else{
+            output = true;
 
             driveAllStop();
 
@@ -726,7 +767,7 @@ Dead code
         telemetry.addData("Distance Error:", error_pos[2]);
 
         telemetry.update();
-        return true;
+        return output;
 
     }
 
