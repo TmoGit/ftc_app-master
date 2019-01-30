@@ -61,11 +61,15 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     public double LSWEEPER_POWER = 0.0;
     public double RSWEEPER_POWER = 0.0;
-    public double SWEEPER_POWER  = 0.0;
+    public double SWEEPER_POWER  = 1.0;
+    public double BUCKET_POWER   = 0.0;
+
+    public boolean sweeperToggle = false;
 
 
-  //  double lPos = 0.0;
-   // double rPos = 0.0;
+
+    //  double lPos = 0.0;
+    // double rPos = 0.0;
 
     int controlState = 0;
     int SequencerStepsMax = 6;
@@ -139,7 +143,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         return Functions.eBased(5);
     }
 
-  @Override
+    @Override
     protected RobotCfg2018 createRobotCfg() {
         RobotCfg2018 robot  = new RobotCfg2018(hardwareMap);
         return robot;
@@ -160,17 +164,17 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 //                    }
 //                }))
                 //.add(
- //                       new Logger.Column(TeleOpPlayback.GAMEPAD_2_TITLE, new InputExtractor<String>() {
- //                           @Override
- //                           public String getValue() {
- //                               try {
- //                                   return BaseEncoding.base64Url().encode(gamepad2.toByteArray());
- //                               } catch (RobotCoreException e) {
-  //                                  e.printStackTrace();
-  //                                  return "";
-  //                              }
-   //                         }
-  //                      })
+                //                       new Logger.Column(TeleOpPlayback.GAMEPAD_2_TITLE, new InputExtractor<String>() {
+                //                           @Override
+                //                           public String getValue() {
+                //                               try {
+                //                                   return BaseEncoding.base64Url().encode(gamepad2.toByteArray());
+                //                               } catch (RobotCoreException e) {
+                //                                  e.printStackTrace();
+                //                                  return "";
+                //                              }
+                //                         }
+                //                      })
                 .build());
     }
 
@@ -218,8 +222,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             SequencerIsComplete = true;
             Current_Seq_Step = 0;
             //for (int i = 0; i < SequencerStepsMax; i++){
-             //   boolStep_Confirm[i] = false;
-           // }
+            //   boolStep_Confirm[i] = false;
+            // }
             runtime.reset();
         }
         if (Status == true){
@@ -272,8 +276,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
             // Move to position
             //while (robotCfg.Motor_ArmBase.getCurrentPosition() != newArmTarget){
-                robotCfg.Motor_ArmBase.setPower(power);
-           // }
+            robotCfg.Motor_ArmBase.setPower(power);
+            // }
 
             //Bump_Timer(1000);
 
@@ -324,12 +328,12 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
             // Move to position
             //while (robotCfg.Motor_LiftLeft.getCurrentPosition() <= newLiftLeftTarget  && robotCfg.Motor_LiftRight.getCurrentPosition() <= newLiftRightTarget && opModeIsActive()){
-                robotCfg.Motor_LiftLeft.setPower(-power);
-                robotCfg.Motor_LiftRight.setPower(power);
+            robotCfg.Motor_LiftLeft.setPower(-power);
+            robotCfg.Motor_LiftRight.setPower(power);
             //}
             //if (robotCfg.Motor_LiftLeft.getCurrentPosition() >= newLiftLeftTarget && robotCfg.Motor_LiftRight.getCurrentPosition() >= newLiftRightTarget) {
-                robotCfg.Motor_LiftRight.setPower(0);
-                robotCfg.Motor_LiftLeft.setPower(0);
+            robotCfg.Motor_LiftRight.setPower(0);
+            robotCfg.Motor_LiftLeft.setPower(0);
 
             //}
 
@@ -350,14 +354,14 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     private void Manual_Bucket_Control(double power)
     {
-        double max = 1, min = -0.5, bucketPos = SERVO_STOP;
+        double max = 1.0, min = -0.5, bucketPos;
 
 
 
         bucketPos = Range.clip(power, min, max);
 
         robotCfg.Servo_Out.setPosition(bucketPos);
-
+        robotCfg.Servo_Out2.setPosition(bucketPos);
     }
 
     private void Preset_Bucket_Control(String pos)
@@ -377,43 +381,38 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     private void Sweeper_Control(double power, int spinTime)
     {
-       // int spinTime = 8000;
+        // int spinTime = 8000;
 
-       // double lPos = robotCfg.Servo_InL.getPosition() + leftPower;
-       // double rPos = robotCfg.Servo_InR.getPosition() + rightPower;
+        // double lPos = robotCfg.Servo_InL.getPosition() + leftPower;
+        // double rPos = robotCfg.Servo_InR.getPosition() + rightPower;
 
 
 
         //robotCfg.Servo_InR.setDirection();
 
-     //   robotCfg.Servo_InL.setPosition(lPos);
-     //   robotCfg.Servo_InR.setPosition(rPos);
+        //   robotCfg.Servo_InL.setPosition(lPos);
+        //   robotCfg.Servo_InR.setPosition(rPos);
         if(controlState == 0) {
 
             robotCfg.Motor_Sweeper.setPower(power);
             //robotCfg.Servo_InR.setPower(rightPower);
             //robotCfg.Servo_InL.setPower(-leftPower);
-        }
-
-        else if(controlState == 1){
+        } else if(controlState == 1){
             //run for a time
-            //runtime.reset();
+
             int endTime = (int)runtime.milliseconds() + spinTime;
 
             //while(getRuntime() <= endTime && opModeIsActive()) {
 
-                robotCfg.Motor_Sweeper.setPower(power);
-                //robotCfg.Servo_InR.setPower(rightPower);
-                //robotCfg.Servo_InL.setPower(-leftPower);
-                Spin_Active_Flag = true;
+            robotCfg.Motor_Sweeper.setPower(power);
+
+            Spin_Active_Flag = true;
             //}
-            //robotCfg.Servo_InR.setPower(0);
-            //robotCfg.Servo_InL.setPower(0);
+
             robotCfg.Motor_Sweeper.setPower(0);
         }
 
         Spin_Active_Flag = false;
-        //runtime.reset();
     }
 
     private void Dump_Auto_Sequence(String status) {
@@ -421,9 +420,9 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
             if (Current_Seq_Step == 0) {
                 //Setup
-               // if (Reset() == true) {
-                   Sequencer(1, true);
-               // }
+                // if (Reset() == true) {
+                Sequencer(1, true);
+                // }
             }
 
         }
@@ -450,7 +449,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             boolStep_Confirm[Current_Seq_Step] = true;
         }
         if (Current_Seq_Step == 4 && boolStep_Confirm[3] == true) {
-          //  Lift_Control(MOTOR_RUNSPEED, LIFT_POSITION);
+            //  Lift_Control(MOTOR_RUNSPEED, LIFT_POSITION);
             //Sequencer(1, true);
 
             boolStep_Confirm[Current_Seq_Step] = true;
@@ -498,8 +497,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if (driver2.x.isPressed()) {
             //controlState = 1;
 
-           // telemetry.addData("Robot Control State is semi-auto, set:", controlState);
-           // telemetry.update();
+            // telemetry.addData("Robot Control State is semi-auto, set:", controlState);
+            // telemetry.update();
 
             //Dump_Auto_Sequence("enable");
 
@@ -508,10 +507,10 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if (driver2.y.isPressed()) {
             //controlState = 0;
 
-           // telemetry.addData("Robot Control State is semi-auto, set:", controlState);
-           // telemetry.update();
+            // telemetry.addData("Robot Control State is semi-auto, set:", controlState);
+            // telemetry.update();
 
-           // Dump_Auto_Sequence("disable");
+            // Dump_Auto_Sequence("disable");
 
         }
 
@@ -556,23 +555,28 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
 
             //Bucket Control
-            if (driver2.a.isPressed()) {
-                //Preset_Bucket_Control("UP");
+            BUCKET_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();
 
-                Manual_Bucket_Control(SERVO_RUNSPEED_DOWN);
-            } else if (driver2.b.isPressed()) {
-                //Preset_Bucket_Control("DUMP");
-
-                Manual_Bucket_Control(SERVO_RUNSPEED_UP);
-            } else
-                Manual_Bucket_Control(SERVO_STOP);
+            Manual_Bucket_Control(BUCKET_POWER);
         }
 
 
         //Sweeper Control
-        SWEEPER_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();
+        if(driver2.b.justPressed() && sweeperToggle == false){
+            sweeperToggle = true;
+        } else if(driver2.b.justPressed() && sweeperToggle){
+            sweeperToggle = false;
+        }
 
-        Sweeper_Control(SWEEPER_POWER, 0);
+        if (driver2.a.isPressed()) {
+            Sweeper_Control(-SWEEPER_POWER, 0);
+
+        } else if (sweeperToggle) {
+            Sweeper_Control(SWEEPER_POWER, 0);
+
+        } else {
+            Sweeper_Control(SERVO_STOP,0);
+        }
 
 
         //Old Sweeper Control Call
@@ -615,9 +619,9 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if (controlState == 1) {
 
 
-            telemetry.addData("Sweepers are running?", Spin_Active_Flag);
-            telemetry.addData("Current Sequencer Step", Current_Seq_Step);
 
+            telemetry.addData("Current Sequencer Step:", Current_Seq_Step);
+            telemetry.addData("Sweepers are running?", Spin_Active_Flag);
 
         }
         else if (controlState == 0) {
@@ -654,3 +658,4 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         isRunning = false;
     }
 }
+
