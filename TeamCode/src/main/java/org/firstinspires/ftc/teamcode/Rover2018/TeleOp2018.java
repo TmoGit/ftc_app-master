@@ -91,6 +91,13 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     boolean Spin_Active_Flag = false;
     boolean armFirstrun = true;
 
+    boolean bucketFirstrun = true;
+    int bucketEndTime = 0;
+    String lastBucketPos = "CAPTURE";
+    boolean bucketDumpRunToggle = false;
+    boolean bucketCaptureRunToggle = false;
+    int bucketMoveTime = 500;
+
     private ElapsedTime runtime = new ElapsedTime();
 
     class ScalingInputExtractor implements InputExtractor<Double> {
@@ -403,32 +410,47 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
 
 
-    private void Manual_Bucket_Control(double power)
+    private void Manual_Bucket_Control(double power, boolean baseServo)
     {
-        double max = 1.0, min = 0, bucketPos;
-        double bucketPos2;
+        if(baseServo){
+            robotCfg.Servo_Out.setPower(power);
+        }
+        else if(!baseServo){
+            robotCfg.Servo_Out2.setPower(-power);
+        }
 
-        bucketPos = power;
-        bucketPos2 = -power;
 
-
-        robotCfg.Servo_Out.setPower(bucketPos);
-        robotCfg.Servo_Out2.setPower(bucketPos2);
     }
 
-    private void Preset_Bucket_Control(String pos)
+    private void Preset_Bucket_Control(String pos, int moveTime)
     {
-        double dumpPos = 0.25, upPos = -0.25, bucketPos = upPos;
+        int currentTime = (int) runtime.milliseconds();
 
+        if(bucketFirstrun){
+            bucketEndTime = currentTime + moveTime;
+
+            bucketFirstrun = false;
+        }
 
         if (pos == "DUMP") {
-            bucketPos = Range.clip(dumpPos, upPos, dumpPos);
+            robotCfg.Servo_Out.setPower(-1);
         }
         else if (pos == "CAPTURE") {
-            bucketPos = Range.clip(upPos, upPos, dumpPos);
+            robotCfg.Servo_Out.setPower(1);
         }
 
-       // robotCfg.Servo_Out.setPosition(bucketPos);
+        if(currentTime >= bucketEndTime){
+            if(pos == "DUMP"){
+                lastBucketPos = "DUMP";
+            }
+            if(pos == "CAPTURE"){
+                lastBucketPos = "CAPTURE";
+            }
+
+            bucketEndTime = 0;
+            bucketFirstrun = true;
+        }
+
     }
 
     private void Sweeper_Control(double power, int spinTime)
@@ -607,9 +629,28 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
 
             //Bucket Control // servo values are between 0 and 1, 0.5 is stop
-            BUCKET_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();
+            //BUCKET_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();
 
-            Manual_Bucket_Control(BUCKET_POWER);
+            Manual_Bucket_Control(driver2.left_stick_y.getRawValue(), true);
+            Manual_Bucket_Control(driver2.right_stick_y.getRawValue(), false);
+
+            if(driver2.x.justPressed()) {
+                if(bucketCaptureRunToggle == false && lastBucketPos == "CAPTURE"){
+                    //bucketDumpRunToggle = true;
+                }
+            }
+            if(driver2.y.justPressed()){
+                if(bucketDumpRunToggle == false && lastBucketPos == "DUMP"){
+                    //bucketCaptureRunToggle = true;
+                }
+            }
+
+            if(bucketDumpRunToggle) {
+                //Preset_Bucket_Control("DUMP", bucketMoveTime);
+            }
+            if(bucketCaptureRunToggle) {
+               // Preset_Bucket_Control("CAPTURE", bucketMoveTime);
+            }
         }
 
 
