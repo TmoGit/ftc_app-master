@@ -554,8 +554,8 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
                 Lift_Control(0.0, 0, false);
             }
 
-            //Bucket Control
-            BUCKET_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();
+            //Bucket Control // servo values are between 0 and 1, 0.5 is stop
+            BUCKET_POWER = (driver2.left_trigger.getRawValue()/2) - (driver2.right_trigger.getRawValue()/2) + 0.5;
 
             Manual_Bucket_Control(BUCKET_POWER);
         }
