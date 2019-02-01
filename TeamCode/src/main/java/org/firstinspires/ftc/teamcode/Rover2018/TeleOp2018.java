@@ -49,7 +49,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     //static final double     DRIVE_SPEED             = 0.6;
     //static final double     TURN_SPEED              = 0.5;
 
-    public double MOTOR_RUNSPEED = 0.75;
+    public double MOTOR_RUNSPEED = 1.0;
     public double LIFT_RUNSPEED = 1.0;
     public double SERVO_RUNSPEED_DOWN = 0.25;
     public double SERVO_RUNSPEED_UP   = 0.75;
@@ -61,7 +61,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     public double LSWEEPER_POWER = 0.0;
     public double RSWEEPER_POWER = 0.0;
-    public double SWEEPER_POWER  = 1.0;
+    public double SWEEPER_POWER  = 0.5;
     public double BUCKET_POWER   = 0.0;
 
     public boolean sweeperToggle = false;
@@ -79,6 +79,10 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     int armStartPos = 0;
     int armEndPos = 0;
     int armSpeedUp = 0;
+    double armSpeed = 0;
+
+    int armSpeedParamLow = 10;
+    int armSpeedParamHigh = 15;
 
     int Current_Seq_Step = 0;
     boolean[] boolStep_Confirm = new boolean[SequencerStepsMax];
@@ -268,51 +272,47 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     {
 
         if(controlState == 0) {
+
+            robotCfg.Motor_ArmBase.setPower(power);
+
+            /*
             if(armFirstrun == true){
                 armStartTime = (int) runtime.milliseconds();
                 armStartPos = robotCfg.Motor_ArmBase.getCurrentPosition();
 
                 armFirstrun = false;
             }
-            else if(armStartTime + 50 < runtime.milliseconds()){
+            else if(armStartTime + 50 <= runtime.milliseconds()){
                 armEndPos = robotCfg.Motor_ArmBase.getCurrentPosition();
                 int armEndTime = (int) runtime.milliseconds();
 
                 int armTotalTime = armEndTime - armStartTime;
                 int armDistance = armEndPos - armStartPos;
 
-                int armSpeed = armDistance / armTotalTime;
+                armSpeed = armDistance / armTotalTime;
 
-                telemetry.addData("Arm Speed ", armSpeed);
-                telemetry.update();
-
-                if(armSpeed < 27){
-                    robotCfg.Motor_ArmBase.setPower(power + armPowerDif);
+                if(armSpeed < armSpeedParamLow){
+                    power = power + armPowerDif;
                     armSpeedUp = 1;
                 }
-                else if(armSpeed > 27){
-                    robotCfg.Motor_ArmBase.setPower(power - armPowerDif);
+                else if(armSpeed > armSpeedParamHigh){
+                    power = power - armPowerDif;
                     armSpeedUp = 2;
-                }
-                else{
-                    robotCfg.Motor_ArmBase.setPower(power);
                 }
 
                 armFirstrun = true;
             }
             else if(armStartTime + 50 > runtime.milliseconds()){
                 if(armSpeedUp == 1){
-                    robotCfg.Motor_ArmBase.setPower(power + armPowerDif);
+                    power = power + armPowerDif;
                 }
-                else if(armSpeedUp == 2){
-                    robotCfg.Motor_ArmBase.setPower(power - armPowerDif);
-                }
-                else{
-                    robotCfg.Motor_ArmBase.setPower(power - armPowerDif);
+                else if(armSpeedUp == 2) {
+                    power = power - armPowerDif;
                 }
             }
 
             robotCfg.Motor_ArmBase.setPower(power);
+            */
         }
 
         else if (controlState == 1){
@@ -405,14 +405,16 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     private void Manual_Bucket_Control(double power)
     {
-        double max = 1.0, min = -0.5, bucketPos;
-
+        double max = 1.0, min = 0, bucketPos;
+        double bucketPos2;
 
 
         bucketPos = Range.clip(power, min, max);
+        bucketPos2 = (-(bucketPos - 0.5)) + 0.5;
+
 
         robotCfg.Servo_Out.setPosition(bucketPos);
-        robotCfg.Servo_Out2.setPosition(bucketPos);
+        robotCfg.Servo_Out2.setPosition(bucketPos2);
     }
 
     private void Preset_Bucket_Control(String pos)
@@ -572,19 +574,19 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
                 telemetry.addData("Arm Movement ", "UP");
                 telemetry.update();
             } else if (driver2.left_bumper.isPressed()) {
-                Arm_Control(-MOTOR_RUNSPEED * (0.75), 0);
+                Arm_Control(-MOTOR_RUNSPEED, 0);
                 telemetry.addData("Arm Movement ", "DOWN");
                 telemetry.update();
             } else {
-                Arm_Control(0.0, 0);
+                robotCfg.Motor_ArmBase.setPower(0.0);
             }
 
             //Left Lift Control
-            if (driver2.dpad_up.isPressed()) {
+            if (driver1.dpad_up.isPressed()) {
                 Lift_Control(LIFT_RUNSPEED, 0, true);
                 telemetry.addData("Left Lift Movement ", "Up");
                 telemetry.update();
-            } else if (driver2.dpad_down.isPressed()) {
+            } else if (driver1.dpad_down.isPressed()) {
                 Lift_Control(-(LIFT_RUNSPEED), 0, true);
                 telemetry.addData("Left Lift Movement ", "DOWN");
                 telemetry.update();
@@ -593,11 +595,11 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
 
             //Right Lift Movement
-            if (driver2.dpad_left.isPressed()) {
+            if (driver2.dpad_up.isPressed()) {
                 Lift_Control(LIFT_RUNSPEED, 0, false);
                 telemetry.addData("Right Lift Movement ", "Up");
                 telemetry.update();
-            } else if (driver2.dpad_right.isPressed()) {
+            } else if (driver2.dpad_down.isPressed()) {
                 Lift_Control(-(LIFT_RUNSPEED), 0, false);
                 telemetry.addData("Right Lift Movement ", "DOWN");
                 telemetry.update();
@@ -626,7 +628,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             Sweeper_Control(SWEEPER_POWER, 0);
 
         } else {
-            Sweeper_Control(SERVO_STOP,0);
+            Sweeper_Control(0,0);
         }
 
 
@@ -658,13 +660,13 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         //telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
         //telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
         telemetry.addData("Current Arm Position: ", robotCfg.Motor_ArmBase.getCurrentPosition());
-        telemetry.addData("Current Left Lift Position: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
-        telemetry.addData("Current Right Lift Position: ", robotCfg.Motor_LiftRight.getCurrentPosition());
-        telemetry.addData("Current Motor_FL Position: ", robotCfg.Motor_WheelFL.getCurrentPosition());
-        telemetry.addData("Current Motor_FR Position: ", robotCfg.Motor_WheelFR.getCurrentPosition());
-        telemetry.addData("Current Motor_BL Position: ", robotCfg.Motor_WheelBL.getCurrentPosition());
-        telemetry.addData("Current Motor_BR Position: ", robotCfg.Motor_WheelBR.getCurrentPosition());
-
+        //telemetry.addData("Current Left Lift Position: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
+      //  telemetry.addData("Current Right Lift Position: ", robotCfg.Motor_LiftRight.getCurrentPosition());
+        //telemetry.addData("Current Motor_FL Position: ", robotCfg.Motor_WheelFL.getCurrentPosition());
+        //telemetry.addData("Current Motor_FR Position: ", robotCfg.Motor_WheelFR.getCurrentPosition());
+        //telemetry.addData("Current Motor_BL Position: ", robotCfg.Motor_WheelBL.getCurrentPosition());
+        //telemetry.addData("Current Motor_BR Position: ", robotCfg.Motor_WheelBR.getCurrentPosition());
+        telemetry.addData("Current Arm Speed: ", armSpeed);
 
 
         if (controlState == 1) {
