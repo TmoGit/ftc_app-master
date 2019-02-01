@@ -408,13 +408,12 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         double max = 1.0, min = 0, bucketPos;
         double bucketPos2;
 
+        bucketPos = power;
+        bucketPos2 = -power;
 
-        bucketPos = Range.clip(power, min, max);
-        bucketPos2 = (-(bucketPos - 0.5)) + 0.5;
 
-
-        robotCfg.Servo_Out.setPosition(bucketPos);
-        robotCfg.Servo_Out2.setPosition(bucketPos2);
+        robotCfg.Servo_Out.setPower(bucketPos);
+        robotCfg.Servo_Out2.setPower(bucketPos2);
     }
 
     private void Preset_Bucket_Control(String pos)
@@ -429,7 +428,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             bucketPos = Range.clip(upPos, upPos, dumpPos);
         }
 
-        robotCfg.Servo_Out.setPosition(bucketPos);
+       // robotCfg.Servo_Out.setPosition(bucketPos);
     }
 
     private void Sweeper_Control(double power, int spinTime)
@@ -608,7 +607,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
 
             //Bucket Control // servo values are between 0 and 1, 0.5 is stop
-            BUCKET_POWER = (driver2.left_trigger.getRawValue()/2) - (driver2.right_trigger.getRawValue()/2) + 0.5;
+            BUCKET_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();
 
             Manual_Bucket_Control(BUCKET_POWER);
         }

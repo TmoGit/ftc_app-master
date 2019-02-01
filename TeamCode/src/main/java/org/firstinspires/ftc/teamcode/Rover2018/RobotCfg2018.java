@@ -84,8 +84,8 @@ public class RobotCfg2018 extends RobotCfg {
     //Defining Servos
     public CRServo Servo_InL = null;
     public CRServo Servo_InR = null;
-    public Servo Servo_Out = null;
-    public Servo Servo_Out2 = null;
+    public CRServo Servo_Out = null;
+    public CRServo Servo_Out2 = null;
     public Servo Servo_Pin = null;
 
     //Sensors
@@ -182,8 +182,8 @@ public class RobotCfg2018 extends RobotCfg {
         //This is where we intilize the servos
         Servo_InR = hardwareMap.get(CRServo.class, "Servo_InR");
         Servo_InL = hardwareMap.get(CRServo.class, "Servo_InL");
-        Servo_Out = hardwareMap.get(Servo.class, "Servo_Out");
-        Servo_Out2 = hardwareMap.get(Servo.class, "Servo_Out2");
+        Servo_Out = hardwareMap.get(CRServo.class, "Servo_Out");
+        Servo_Out2 = hardwareMap.get(CRServo.class, "Servo_Out2");
         Servo_Pin = hardwareMap.get(Servo.class, "Servo_Pin");
 
         //Sensors
