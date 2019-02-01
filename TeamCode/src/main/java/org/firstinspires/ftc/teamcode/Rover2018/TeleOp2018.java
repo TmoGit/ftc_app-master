@@ -615,8 +615,12 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
                 Lift_Control(0.0, 0, true);
             }
 
+            double rightLiftPower = driver2.right_trigger.getRawValue() - driver2.left_trigger.getRawValue();
+
+            Lift_Control(rightLiftPower, 0, false);
+
             //Right Lift Movement
-            if (driver2.dpad_up.isPressed()) {
+            /*if (driver2.dpad_up.isPressed()) {
                 Lift_Control(LIFT_RUNSPEED, 0, false);
                 telemetry.addData("Right Lift Movement ", "Up");
                 telemetry.update();
@@ -626,7 +630,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
                 telemetry.update();
             } else {
                 Lift_Control(0.0, 0, false);
-            }
+            }*/
 
             //Bucket Control // servo values are between 0 and 1, 0.5 is stop
             //BUCKET_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();

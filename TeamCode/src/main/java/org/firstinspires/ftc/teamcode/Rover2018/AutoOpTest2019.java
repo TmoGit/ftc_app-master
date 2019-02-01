@@ -211,7 +211,7 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{0.35, 0.0, 0.0, 0.15}, {0.0, -0.75, 0.0, 1.5}, {1.0, 0.0, 0.0, 2.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+            {{0.35, 0.0, 0.0, 0.3}, {0.0, -0.75, 0.0, 1.5}, {1.0, 0.0, 0.0, 2.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                     //Vector positions 6-11 is for Route 2
                     {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
@@ -230,8 +230,8 @@ Z	0	0	0	0	1	-1
             2000,
             0,
             4000,
-            2000,
-            2000,
+            0000,
+            0000,
             2000,
             2000,
             2000,
@@ -242,7 +242,7 @@ Z	0	0	0	0	1	-1
     // Steps for driving are sequential 1 - XX
     private int[] routeTimes = new int[]{
             // Drive intervals need to equal up to 30s - time to execute other steps
-            2000, 4000, 4000, 6000, 4000, 4000,
+            2000, 4000, 7000, 0000, 0000, 4000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000
@@ -441,7 +441,7 @@ Z	0	0	0	0	1	-1
                 getCurrentVector();
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
-
+                robotCfg.Motor_Sweeper.setPower(1);
 
                     stateStepper(State.STATE_STOP, true);
 
@@ -452,6 +452,8 @@ Z	0	0	0	0	1	-1
                 //All Stop
 
                 driveAllStop();
+
+                robotCfg.Motor_Sweeper.setPower(0);
 
                     stateStepper(State.STATE_COMPLETE, false);
 
@@ -751,7 +753,7 @@ Dead code
 
 
         //Check time and distance
-        if ((!stateTimeCheck(isDStep)) || !((current_pos[2] >= target_pos[2]) || (error_pos[2]<=60))){
+        if ((!stateTimeCheck(isDStep)) || !((current_pos[2] >= target_pos[2]) || (error_pos[2]<=100))){
             robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
             robotCfg.Motor_WheelFR.setPower(wheelPowers[1]);
             robotCfg.Motor_WheelBL.setPower(wheelPowers[2]);
