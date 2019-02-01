@@ -70,16 +70,22 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     //  double lPos = 0.0;
     // double rPos = 0.0;
+    double armPowerDif = 0.1;
 
     int controlState = 0;
     int SequencerStepsMax = 6;
     int Step_Bump = 5000;
+    int armStartTime = 0;
+    int armStartPos = 0;
+    int armEndPos = 0;
+    int armSpeedUp = 0;
 
     int Current_Seq_Step = 0;
     boolean[] boolStep_Confirm = new boolean[SequencerStepsMax];
     boolean SequencerIsActive = false;
     boolean SequencerIsComplete = false;
     boolean Spin_Active_Flag = false;
+    boolean armFirstrun = true;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -260,7 +266,52 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     private void Arm_Control(double power, double inchDist)
     {
+
         if(controlState == 0) {
+            if(armFirstrun == true){
+                armStartTime = (int) runtime.milliseconds();
+                armStartPos = robotCfg.Motor_ArmBase.getCurrentPosition();
+
+                armFirstrun = false;
+            }
+            else if(armStartTime + 50 < runtime.milliseconds()){
+                armEndPos = robotCfg.Motor_ArmBase.getCurrentPosition();
+                int armEndTime = (int) runtime.milliseconds();
+
+                int armTotalTime = armEndTime - armStartTime;
+                int armDistance = armEndPos - armStartPos;
+
+                int armSpeed = armDistance / armTotalTime;
+
+                telemetry.addData("Arm Speed ", armSpeed);
+                telemetry.update();
+
+                if(armSpeed < 27){
+                    robotCfg.Motor_ArmBase.setPower(power + armPowerDif);
+                    armSpeedUp = 1;
+                }
+                else if(armSpeed > 27){
+                    robotCfg.Motor_ArmBase.setPower(power - armPowerDif);
+                    armSpeedUp = 2;
+                }
+                else{
+                    robotCfg.Motor_ArmBase.setPower(power);
+                }
+
+                armFirstrun = true;
+            }
+            else if(armStartTime + 50 > runtime.milliseconds()){
+                if(armSpeedUp == 1){
+                    robotCfg.Motor_ArmBase.setPower(power + armPowerDif);
+                }
+                else if(armSpeedUp == 2){
+                    robotCfg.Motor_ArmBase.setPower(power - armPowerDif);
+                }
+                else{
+                    robotCfg.Motor_ArmBase.setPower(power - armPowerDif);
+                }
+            }
+
             robotCfg.Motor_ArmBase.setPower(power);
         }
 
