@@ -211,7 +211,7 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{1.0, 0.0, 0.0, 4.0}, {0.0, -1.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+            {{0.35, 0.0, 0.0, 0.15}, {0.0, -0.75, 0.0, 1.5}, {1.0, 0.0, 0.0, 2.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                     //Vector positions 6-11 is for Route 2
                     {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
@@ -375,7 +375,7 @@ Z	0	0	0	0	1	-1
 
                 //Sleep
 
-                    stateStepper(State.STATE_DSTEP_1, true);
+                        stateStepper(State.STATE_DSTEP_1, true);
 
 
                 break;
@@ -401,8 +401,13 @@ Z	0	0	0	0	1	-1
 
                // if (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true)) {
                 //      if(!robotCfg.Motor_WheelBL.isBusy()) {
-                          stateStepper(State.STATE_DSTEP_3, true);
-                 //     }
+                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
+                    if(!robotCfg.Motor_WheelBL.isBusy()) {
+                        stateStepper(State.STATE_DSTEP_3, true);
+                    }
+                }
+
+                //     }
                // }
 
                 break;
@@ -412,8 +417,11 @@ Z	0	0	0	0	1	-1
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-
-                    stateStepper(State.STATE_DSTEP_4, true);
+                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))) {
+                    if (!robotCfg.Motor_WheelBL.isBusy()) {
+                        stateStepper(State.STATE_DSTEP_4, true);
+                    }
+                }
 
 
                 break;
@@ -743,7 +751,7 @@ Dead code
 
 
         //Check time and distance
-        if ((!stateTimeCheck(isDStep)) || !(current_pos[2] >= target_pos[2])){
+        if ((!stateTimeCheck(isDStep)) || !((current_pos[2] >= target_pos[2]) || (error_pos[2]<=60))){
             robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
             robotCfg.Motor_WheelFR.setPower(wheelPowers[1]);
             robotCfg.Motor_WheelBL.setPower(wheelPowers[2]);
@@ -806,7 +814,7 @@ Dead code
 
     private void telemetry_update(){
      // Telemetry writes, can remove for competition
-
+/*
         telemetry.addData("Current State:", currentState);
         telemetry.addData("State Counter:", stateCounter);
         telemetry.addData("Current Route #", CURRENT_ROUTE);
@@ -818,7 +826,7 @@ Dead code
         telemetry.addData("Left Arm Motor ENC VAL:", robotCfg.Motor_LiftLeft.getCurrentPosition());
         telemetry.addData("Right Arm Motor ENC VAL:", robotCfg.Motor_LiftRight.getCurrentPosition());
         telemetry.addData("Wheel FL Motor ENC VAL:", robotCfg.Motor_WheelFL.getCurrentPosition());
-
+*/
         //composeTelemetry();
 
         telemetry.update();
