@@ -120,10 +120,6 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     boolean liftFirst = true;
     int liftEndTime = 0;
 
-    boolean pinFirst = true;
-    int pinEndTime = 0;
-
-
     double gxVal = 0;
     double gyVal = 0;
     double grVal = 0;
@@ -142,8 +138,6 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     };
 
-
-    public int[] TIMELINE = {};
 
     Vector2D XYVector;
 
@@ -176,7 +170,9 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     public int CURRENT_TIME_INT = 0;
     private int[] drive_target_pos = { 0, 0, 0, 0 };
     private boolean drive_first_run = true;
+    private int drive_target_time = 0;
 
+    public int CURRENT_DSTEP_BUMP_TIME = 0;
 
     private double[][] routeVectors = new double[][]
 
@@ -384,10 +380,10 @@ Z	0	0	0	0	1	-1
                 getCurrentVector();
 
 
-                if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
-                    if(!robotCfg.Motor_WheelBL.isBusy()) {
+                if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME,true))){
+                 //   if(!robotCfg.Motor_WheelBL.isBusy()) {
                         stateStepper(State.STATE_DSTEP_2, true);
-                    }
+                   // }
                 }
 
                 break;
@@ -399,10 +395,10 @@ Z	0	0	0	0	1	-1
 
                // if (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true)) {
                 //      if(!robotCfg.Motor_WheelBL.isBusy()) {
-                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
-                    if(!robotCfg.Motor_WheelBL.isBusy()) {
+                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))){
+                   // if(!robotCfg.Motor_WheelBL.isBusy()) {
                         stateStepper(State.STATE_DSTEP_3, true);
-                    }
+                   // }
                 }
 
                 //     }
@@ -415,10 +411,10 @@ Z	0	0	0	0	1	-1
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))) {
-                    if (!robotCfg.Motor_WheelBL.isBusy()) {
+                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))) {
+                   // if (!robotCfg.Motor_WheelBL.isBusy()) {
                         stateStepper(State.STATE_DSTEP_4, true);
-                    }
+                   // }
                 }
 
 
@@ -547,6 +543,7 @@ Z	0	0	0	0	1	-1
         currentVector[3] = routeVectors[CURRENT_DSTEP][3];
         CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
 
+        CURRENT_DSTEP_BUMP_TIME = routeTimes[CURRENT_STEP_START + CURRENT_DSTEP - 1] - 1000;
     }
 
     public void driveAllStop(){
@@ -562,7 +559,7 @@ Z	0	0	0	0	1	-1
         robotCfg.Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, boolean isDStep) {
+    private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, int drive_time, boolean isDStep) {
         //Main Drive Routine
         boolean output = false;
         double x = rangeClipDouble(speed, -1, 1);
@@ -571,9 +568,13 @@ Z	0	0	0	0	1	-1
         int[] current_pos = new int[]{0,0,0,0};
         int[] target_pos = new int[]{0,0,0,0};
         int[] error_pos = new int[]{0,0,0,0};
+        int current_time = (int)runtime.milliseconds();
 
         if(drive_first_run){
             drive_first_run = false;
+
+            drive_target_time = current_time + drive_time;
+
             drive_target_pos[0] = robotCfg.Motor_WheelFL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
             drive_target_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
             drive_target_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
@@ -627,12 +628,11 @@ Z	0	0	0	0	1	-1
         wheelPowers[3] = rangeClipDouble((x1 + y1 - z),-1,1);
 
         //Check time and distance
-        if ((!stateTimeCheck(isDStep)) || !((current_pos[2] >= target_pos[2]) || (error_pos[2]<=100))){
+        if ((!stateTimeCheck(isDStep)) && (current_time < drive_target_time || (!(current_pos[2] >= target_pos[2]) || (error_pos[2]>=100)))){
             robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
             robotCfg.Motor_WheelFR.setPower(wheelPowers[1]);
             robotCfg.Motor_WheelBL.setPower(wheelPowers[2]);
             robotCfg.Motor_WheelBR.setPower(wheelPowers[3]);
-
         }
         else{
             output = true;
@@ -646,7 +646,7 @@ Z	0	0	0	0	1	-1
         telemetry.addData("FR Power:", wheelPowers[1]);
         telemetry.addData("BL Power:", wheelPowers[2]);
         telemetry.addData("BR Power:", wheelPowers[3]);
-        telemetry.addData("Target Position:", target_pos[2]);
+        telemetry.addData("Target Position:", drive_target_pos[2]);
         telemetry.addData("Current Position:", current_pos[2]);
         telemetry.addData("Distance Error:", error_pos[2]);
 
