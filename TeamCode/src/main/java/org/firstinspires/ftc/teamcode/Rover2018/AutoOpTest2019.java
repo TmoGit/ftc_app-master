@@ -93,7 +93,7 @@ import java.util.Locale;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="AutoOp2019", group="Official")
+@Autonomous(name="AutoOp2019", group = "Official")
 
 public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
@@ -408,7 +408,7 @@ Z	0	0	0	0	1	-1
                 }
 
                 //     }
-               // }
+                // }
 
                 break;
             case STATE_DSTEP_3:
