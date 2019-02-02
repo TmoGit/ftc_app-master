@@ -317,9 +317,10 @@ Z	0	0	0	0	1	-1
             case STATE_INITIAL:
 
 
-              //  if(pinRelease(1750)) {
+
+
                     stateStepper(State.STATE_MOVE_ARM, false);
-               // }
+
                 break;
             case STATE_MOVE_ARM:
 
@@ -354,6 +355,7 @@ Z	0	0	0	0	1	-1
                 break;
             case STATE_ESTABLISH_POSITION:
 
+                routeDesignate();
 
                     stateStepper(State.STATE_DRIVE_ROUTE, false);
 
@@ -497,6 +499,32 @@ Z	0	0	0	0	1	-1
             }
 
             return output;
+    }
+
+    private void routeDesignate(){
+        int route = 0;
+        String targetName = Vuforia.targetsAreVisible();
+
+        telemetry.addData("Target ID:", targetName);
+        telemetry_update();
+
+        switch (targetName){
+            case "Blue_Crater":
+                CURRENT_ROUTE = 1;
+                break;
+            case "Blue_Depot":
+                CURRENT_ROUTE = 2;
+                break;
+            case "Red_Crater":
+                CURRENT_ROUTE = 1;
+                break;
+            case "Red_Depot":
+                CURRENT_ROUTE = 2;
+                break;
+            case "None":
+                CURRENT_ROUTE = 1;
+                break;
+        }
     }
 
     private void setDriveStart(int ROUTE){
@@ -742,6 +770,7 @@ Z	0	0	0	0	1	-1
         isRunning = true;
 
 
+
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -753,6 +782,9 @@ Z	0	0	0	0	1	-1
         robotCfg.Gyro_Hub.initialize(parameters);
 
         runtime.reset();
+
+        Vuforia.initVuforia();
+        Vuforia.activateTracking();
     }
 
     //Placeholder for logger, needed for class

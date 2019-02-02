@@ -42,8 +42,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.Hardware;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 
 import static ftc.evlib.vision.framegrabber.GlobalFrameGrabber.frameGrabber;
 
@@ -90,6 +94,8 @@ public class RobotCfg2018 extends RobotCfg {
 
     //Sensors
     public BNO055IMU Gyro_Hub = null;
+    public static WebcamName webcam = null;
+
 
     public Orientation angles;
     public Acceleration gravity;
@@ -98,7 +104,7 @@ public class RobotCfg2018 extends RobotCfg {
     public static final double OutDumpPos    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;
 
-
+    public static int viewId = 0;
 
 
 //    public MainRobotCfg(HardwareMap hardwareMap) {
@@ -163,6 +169,9 @@ public class RobotCfg2018 extends RobotCfg {
 
     }
 
+
+
+
     public RobotCfg2018(HardwareMap hardwareMap, Map<ServoName, Enum> servoStartPresetMap) {
         super(hardwareMap);
         //colorSensor = hardwareMap.colorSensor.get(COLOR_SENSOR_NAME);
@@ -188,6 +197,7 @@ public class RobotCfg2018 extends RobotCfg {
 
         //Sensors
         Gyro_Hub = hardwareMap.get(BNO055IMU.class, "Gyro_Hub");
+        webcam = hardwareMap.get(WebcamName.class, "webcam");
 
 
         //Reset Encoders
@@ -211,6 +221,10 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         Motor_Sweeper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //Setting limits on the camera
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        viewId = cameraMonitorViewId;
 
 
 
