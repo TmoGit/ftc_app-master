@@ -106,8 +106,6 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     private ElapsedTime     runtime = new ElapsedTime();
 
-
-
     static final double     COUNTS_PER_MOTOR_REV    = 288 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
@@ -176,6 +174,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     public int CURRENT_ROUTE = 1;
     public int CURRENT_STEP_START = 0;
     public int CURRENT_TIME_INT = 0;
+    private int[] drive_target_pos = { 0, 0, 0, 0 };
+    private boolean drive_first_run = true;
 
 
     private double[][] routeVectors = new double[][]
@@ -205,8 +205,6 @@ Z	0	0	0	0	1	-1
 
 4 Vector array element is magnitude i.e. distance in inches
 
-
-
 */
 
             //Vector positions 0-5 is for Route 1
@@ -228,10 +226,10 @@ Z	0	0	0	0	1	-1
     private int[] stepTimes = new int[]{
             // Sequencer step intervals, these need to match drive step times and equal 30s
             2000,
-            0,
+            000,
             4000,
-            0000,
-            0000,
+            000,
+            000,
             2000,
             2000,
             2000,
@@ -386,7 +384,7 @@ Z	0	0	0	0	1	-1
                 getCurrentVector();
 
 
-                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
+                if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true))){
                     if(!robotCfg.Motor_WheelBL.isBusy()) {
                         stateStepper(State.STATE_DSTEP_2, true);
                     }
@@ -460,24 +458,8 @@ Z	0	0	0	0	1	-1
                 break;
         }
 
-
     }
 
-
-/*
-Dead code
-    public boolean sleep(long sleepTime)  {
-       // runtime.reset();
-
-
-        if(runtime.milliseconds() <= sleepTime){
-            return false;
-        }
-
-
-        return true;
-    }
-*/
     public boolean opModeIsActive(){
         return isRunning;
     }
@@ -499,36 +481,10 @@ Dead code
         }
     }
 
-    private boolean pinRelease(int moveTime){
-        int currentTime = (int) runtime.milliseconds();
-        boolean output = false;
-
-
-        if(pinFirst){
-            pinEndTime = currentTime + moveTime;
-            pinFirst = false;
-        }
-
-        if(currentTime < pinEndTime) {
-            robotCfg.Servo_Pin.setPosition(1.0);
-        } else {
-            robotCfg.Servo_Pin.setPosition(SERVO_STOP);
-            pinFirst = true;
-            pinEndTime = 0;
-            output = true;
-        }
-
-
-
-
-        return output;
-    }
-
     private boolean Lift_Control(double power, int liftTime) {
             //Only controls drop/hook lift
             int currentTime = (int) runtime.milliseconds();
             boolean output = false;
-
 
             if(liftFirst){
                 liftEndTime = currentTime + liftTime;
@@ -543,9 +499,6 @@ Dead code
                 liftEndTime = 0;
                 output = true;
             }
-
-
-
 
             return output;
     }
@@ -562,7 +515,6 @@ Dead code
 5 - Drive Step 6	11- Drive Step 12	17 - Drive Step 18	23 - Drive Step 24
 
 */
-
         switch (ROUTE){
             case 1:
 
@@ -596,68 +548,9 @@ Dead code
         CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
 
     }
-/*
-    Dead Code
-    private void Forward_Control(double xVec, double yVec, double rVec, int runTime){
 
-        ScalingInputExtractor rightY;
-        ScalingInputExtractor leftX;
-        ScalingInputExtractor rightX;
-
-        gxVal = xVec;
-        gyVal = yVec;
-        grVal = rVec;
-
-       // runtime.reset();
-
-        InputExtractor<Double> x = new InputExtractor<Double>() {
-            @Override
-            public Double getValue() {
-                return gxVal;
-            }
-        };
-
-        InputExtractor<Double> y = new InputExtractor<Double>() {
-            @Override
-            public Double getValue() {
-                return gyVal;
-            }
-        };
-
-        InputExtractor<Double> r = new InputExtractor<Double>() {
-            @Override
-            public Double getValue() {
-                return grVal;
-            }
-        };
-
-
-        rightX = new ScalingInputExtractor(x, 1);
-        rightY = new ScalingInputExtractor(y, 1);
-        leftX = new ScalingInputExtractor(r, 1);
-
-
-        if(stateTimeCheck(true) == false) {
-            robotCfg.getMecanumControl().setTranslationControl(TranslationControls.inputExtractorXY(rightY, rightX));
-//          robotCfg.getMecanumControl().setRotationControl(RotationControls.teleOpGyro(leftX, robotCfg.getGyro()));
-            robotCfg.getMecanumControl().setRotationControl(RotationControls.inputExtractor(leftX));
-
-            telemetry.addData("Elapsed Time:", runTime);
-            telemetry.update();
-        }
-
-
-
-
-        //Resetting global variables
-        gxVal = 0;
-        gyVal = 0;
-        grVal = 0;
-    }
-*/
     public void driveAllStop(){
         //Stops and resets encoders
-
         robotCfg.Motor_WheelFL.setPower(0);
         robotCfg.Motor_WheelFR.setPower(0);
         robotCfg.Motor_WheelBL.setPower(0);
@@ -667,13 +560,11 @@ Dead code
         robotCfg.Motor_WheelFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robotCfg.Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robotCfg.Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
     }
 
     private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, boolean isDStep) {
         //Main Drive Routine
         boolean output = false;
-
         double x = rangeClipDouble(speed, -1, 1);
         double y = rangeClipDouble(direction_speed, -1, 1);
         double z = rangeClipDouble(rotation, -1, 1);
@@ -681,34 +572,26 @@ Dead code
         int[] target_pos = new int[]{0,0,0,0};
         int[] error_pos = new int[]{0,0,0,0};
 
+        if(drive_first_run){
+            drive_first_run = false;
+            drive_target_pos[0] = robotCfg.Motor_WheelFL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+            drive_target_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+            drive_target_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+            drive_target_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+        }
+
         //Capture all encoder values, only use back wheel of robot for encoder value
         current_pos[0] = robotCfg.Motor_WheelFL.getCurrentPosition();
-        target_pos[0] = robotCfg.Motor_WheelFL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
-        error_pos[0] = Math.abs(target_pos[0] - current_pos[0]);
+        error_pos[0] = Math.abs(drive_target_pos[0] - current_pos[0]);
 
         current_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition();
-        target_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
-        error_pos[1] = Math.abs(target_pos[1] - current_pos[1]);
+        error_pos[1] = Math.abs(drive_target_pos[1] - current_pos[1]);
 
         current_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition();
-        target_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
-        error_pos[2] = Math.abs(target_pos[2] - current_pos[2]);
+        error_pos[2] = Math.abs(drive_target_pos[2] - current_pos[2]);
 
         current_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition();
-        target_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
-        error_pos[3] = Math.abs(target_pos[3] - current_pos[3]);
-
-        /*
-        Dead Code
-        double V_1 = 0;
-        double V_2 = 0;
-        double V_3 = 0;
-        double V_4 = 0;
-        double Vd = speed;
-        double Td = Math.toRadians(rotation);
-        double Td_Comp = 0;
-        double Vt = 1;
-        */
+        error_pos[3] = Math.abs(drive_target_pos[3] - current_pos[3]);
 
         robotCfg.angles = robotCfg.Gyro_Hub.getAngularOrientation(
                 AxesReference.INTRINSIC, AxesOrder.XYX, AngleUnit.DEGREES);
@@ -729,15 +612,8 @@ Dead code
         double sinA = Math.sin(Math.toRadians(angle));
         double x1 = x * cosA - y * sinA;
         double y1 = x * sinA + y * cosA;
-
         double[] wheelPowers = new double[4];
-/*
-        Dead Code
-        wheelPowers[0] = V_1;
-        wheelPowers[1] = V_2;
-        wheelPowers[2] = V_3;
-        wheelPowers[3] = V_4;
-        */
+
 
         //Gyro compensation NOT READY
        // if (z==0){
@@ -750,8 +626,6 @@ Dead code
         wheelPowers[2] = rangeClipDouble((-x1 + y1 + z),-1,1);
         wheelPowers[3] = rangeClipDouble((x1 + y1 - z),-1,1);
 
-
-
         //Check time and distance
         if ((!stateTimeCheck(isDStep)) || !((current_pos[2] >= target_pos[2]) || (error_pos[2]<=100))){
             robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
@@ -762,9 +636,9 @@ Dead code
         }
         else{
             output = true;
+            drive_first_run = true;
 
             driveAllStop();
-
         }
 
         //remove this after debug
@@ -805,15 +679,6 @@ Dead code
         return rotation;
     }
 
-/*Not needed - Dead Code
-    private void main_run(){
-        //Main Loop
-
-        stateCall();
-
-    }
-    */
-
     private void telemetry_update(){
      // Telemetry writes, can remove for competition
 /*
@@ -829,73 +694,10 @@ Dead code
         telemetry.addData("Right Arm Motor ENC VAL:", robotCfg.Motor_LiftRight.getCurrentPosition());
         telemetry.addData("Wheel FL Motor ENC VAL:", robotCfg.Motor_WheelFL.getCurrentPosition());
 */
-        //composeTelemetry();
 
         telemetry.update();
     }
 
-/*
-Dead code
-    void composeTelemetry() {
-
-        // At the beginning of each telemetry update, grab a bunch of data
-        // from the IMU that we will then display in separate lines.
-        telemetry.addAction(new Runnable() { @Override public void run()
-        {
-            // Acquiring the angles is relatively expensive; we don't want
-            // to do that in each of the three items that need that info, as that's
-            // three times the necessary expense.
-            robotCfg.angles   = robotCfg.Gyro_Hub.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            robotCfg.gravity  = robotCfg.Gyro_Hub.getGravity();
-        }
-        });
-
-
-        telemetry.addData("status", new Func<String>() {
-                    @Override public String value() {
-                        return robotCfg.Gyro_Hub.getSystemStatus().toShortString();
-                    }
-                });
-        telemetry.addData("calib", new Func<String>() {
-                    @Override public String value() {
-                        return robotCfg.Gyro_Hub.getCalibrationStatus().toString();
-                    }
-                });
-
-
-        telemetry.addData("heading", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(robotCfg.angles.angleUnit, robotCfg.angles.firstAngle);
-                    }
-                });
-        telemetry.addData("roll", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(robotCfg.angles.angleUnit, robotCfg.angles.secondAngle);
-                    }
-                });
-        telemetry.addData("pitch", new Func<String>() {
-                    @Override public String value() {
-                        return formatAngle(robotCfg.angles.angleUnit, robotCfg.angles.thirdAngle);
-                    }
-                });
-
-
-        telemetry.addData("grvty", new Func<String>() {
-                    @Override public String value() {
-                        return robotCfg.gravity.toString();
-    }
-});
-        telemetry.addData("mag", new Func<String>() {
-                    @Override public String value() {
-                        return String.format(Locale.getDefault(), "%.3f",
-                                Math.sqrt(robotCfg.gravity.xAccel*robotCfg.gravity.xAccel
-                                        + robotCfg.gravity.yAccel*robotCfg.gravity.yAccel
-                                        + robotCfg.gravity.zAccel*robotCfg.gravity.zAccel));
-                    }
-                });
-    }
-
-    */
 
     //----------------------------------------------------------------------------------------------
     // Formatting
@@ -928,7 +730,6 @@ Dead code
         //Main routine
         robotCfg.Gyro_Hub.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
-       // main_run();
         stateCall();
 
         telemetry_update();
@@ -960,7 +761,7 @@ Dead code
         return null;
     }
 
-    }
+}
 
 
 
