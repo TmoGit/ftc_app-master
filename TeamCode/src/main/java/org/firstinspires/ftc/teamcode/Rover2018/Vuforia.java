@@ -80,17 +80,15 @@ public class Vuforia{
         int captureCounter = 0;
         File captureDirectory = AppUtil.ROBOT_DATA_DIR;
 
-
-
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(RobotCfg2018.viewId);
 
         parameters.cameraName = RobotCfg2018.webcam;
 
-        parameters.vuforiaLicenseKey = "AeY4MXz/////AAAAGRwm5YCC8EWCrB4+iRLrzaM6G1mJxH3xoYHxnJ+Wq" +
-                "u84iHxbyjnWrk2U7zlOW9dqhe9ikLeiu6edQRBE" +
-                "6KsPn4zHkUP25Hj+5GbJ/g0wG6RiAXjxGw7JkIsmD7rgnrMHTCrClASjmhoEUopIwc913EuQa1a2IOw" +
-                "gbyY9x/8SkeHsg0uzyoYWMjjh/j2m4WXDBXidBKbmO3xsjl9w8XQ4JHsL5ggcKuAdjmSwvPXFuZeUu2VCYRXt8YbMAG5eqNHHaBj" +
-                "lIBEvdrNxEaTb2Vg9oX1zwKpJBQcXeTNxZCaDTfgcw9xg+0e4h+ZVYV0xFUDX5is8a95cA5Kf+OAZDmH+12ZaxGO+2+tA3huD5jo+Gsuu";
+        parameters.vuforiaLicenseKey = "AQICQI//////AAABmeVTX5jQ80ZEmLPY3sGyPX6K7pmz/sOPUl18jBKN3GFq" +
+                "wCrtS9j2Qusl4h67U0lP7PtXe/1BMC+QsdYEgzYDJp7sMNoE9zvJTv57v3uNZj+O84ZcNWwsOHvB4r/TLLahSUW0md/njq1SeVrdxh1n" +
+                "ezdTTDNWw73RxfUw/41IBwULVjPjlZVxaSFMqg4Zx99ndTsJEQ0DhJhQF6R5REQwkj7yiTSZqZS7QoNDdIzikgD6CmC/" +
+                "7KhHgr6j8LdO6comvfc2but1QVq+rcqErNvXjYHdnJytS6I1yZ9JxSSEsAAQUsFfQFBfwX" +
+                "fxcAdx2XM3taHlPCs3qOcmwFx4YCh7saw+ydzF4y12HijkORNlgLC";
 
         VuforiaLocalizer vuforia  = ClassFactory.getInstance().createVuforia(parameters);
 
