@@ -356,6 +356,7 @@ Z	0	0	0	0	1	-1
             case STATE_ESTABLISH_POSITION:
 
                 routeDesignate();
+                telemetry.addData("Route Set", CURRENT_ROUTE);
 
                   //  stateStepper(State.STATE_DRIVE_ROUTE, false);
 
@@ -509,22 +510,23 @@ Z	0	0	0	0	1	-1
         telemetry_update();
 
         switch (targetName){
-            case "Blue_Crater":
+            case "BlueAlliance":
                 CURRENT_ROUTE = 1;
                 break;
-            case "Blue_Depot":
+            case "RedAlliance":
                 CURRENT_ROUTE = 2;
                 break;
-            case "Red_Crater":
+            case "FrontWall":
                 CURRENT_ROUTE = 1;
                 break;
-            case "Red_Depot":
+            case "BackWall":
                 CURRENT_ROUTE = 2;
                 break;
             case "None":
                 CURRENT_ROUTE = 1;
                 break;
         }
+
     }
 
     private void setDriveStart(int ROUTE){

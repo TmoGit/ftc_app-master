@@ -74,6 +74,9 @@ public class Vuforia{
     private static VuforiaTrackable targetFRP;
     private static VuforiaTrackable targetBKP;
 
+    private static List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+
+    //When called activates tracking for targets
     public static void activateTracking(){
         if(targets != null){
             targets.activate();
@@ -81,8 +84,7 @@ public class Vuforia{
     }
 
     public static void initVuforia(){
-        OpenGLMatrix lastLocation = null;
-        int captureCounter = 0;
+
         File captureDirectory = AppUtil.ROBOT_DATA_DIR;
         VuforiaLocalizer vuforia;
 
@@ -98,27 +100,34 @@ public class Vuforia{
 
         vuforia.enableConvertFrameToBitmap();
 
-        VuforiaTrackables targets = vuforia.loadTrackablesFromAsset("RoverRuckus");
-       /* targets.get(0).setName("Blue_Crater");
-        targets.get(1).setName("Blue_Depot");
-        targets.get(2).setName("Red_Crater");
-        targets.get(3).setName("Red_Depot");
-        */
-       targetBLP = targets.get(0);
+        targets = vuforia.loadTrackablesFromAsset("RoverRuckus");
+
+        targetBLP = targets.get(0);
+        targetBLP.setName("BlueAlliance");
+
         targetRDP = targets.get(1);
+        targetRDP.setName("RedAlliance");
+
         targetFRP = targets.get(2);
+        targetFRP.setName("FrontWall");
+
         targetBKP = targets.get(3);
+        targetBKP.setName("BackWall");
 
 
 
-        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+
         allTrackables.addAll(targets);
 
         float mmPerInch        = 25.4f;
         float mmBotWidth       = 18 * mmPerInch;            // ... or whatever is right for your robot
         float mmFTCFieldWidth  = (12*12 - 2) * mmPerInch;   // the FTC field is ~11'10" center-to-center of the glass panels
 
-        targetOrientation = OpenGLMatrix.translation(0,0,150)
+
+
+
+        targetOrientation = OpenGLMatrix
+                 .translation(0, mmFTCFieldWidth/2, 0)
                 .multiplied(Orientation.getRotationMatrix(
                         AxesReference.EXTRINSIC,
                         AxesOrder.XYZ,
@@ -127,6 +136,8 @@ public class Vuforia{
                         0 ,
                         -90
                 ));
+
+
 
         robotFromCamera = OpenGLMatrix
                 .translation(mmBotWidth/2,0,0)
@@ -143,108 +154,37 @@ public class Vuforia{
 
 
     }
-    /*
-    public static void initoldVuforia(){
-
-
-        OpenGLMatrix lastLocation = null;
-        int captureCounter = 0;
-        File captureDirectory = AppUtil.ROBOT_DATA_DIR;
-
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(RobotCfg2018.viewId);
-
-        parameters.cameraName = RobotCfg2018.webcam;
-
-        parameters.vuforiaLicenseKey = "AQICQI//////AAABmeVTX5jQ80ZEmLPY3sGyPX6K7pmz/sOPUl18jBKN3GFq" +
-                "wCrtS9j2Qusl4h67U0lP7PtXe/1BMC+QsdYEgzYDJp7sMNoE9zvJTv57v3uNZj+O84ZcNWwsOHvB4r/TLLahSUW0md/njq1SeVrdxh1n" +
-                "ezdTTDNWw73RxfUw/41IBwULVjPjlZVxaSFMqg4Zx99ndTsJEQ0DhJhQF6R5REQwkj7yiTSZqZS7QoNDdIzikgD6CmC/" +
-                "7KhHgr6j8LdO6comvfc2but1QVq+rcqErNvXjYHdnJytS6I1yZ9JxSSEsAAQUsFfQFBfwX" +
-                "fxcAdx2XM3taHlPCs3qOcmwFx4YCh7saw+ydzF4y12HijkORNlgLC";
-
-        VuforiaLocalizer vuforia  = ClassFactory.getInstance().createVuforia(parameters);
-
-        AppUtil.getInstance().ensureDirectoryExists(captureDirectory);
-
-        vuforia.enableConvertFrameToBitmap();
-
-        VuforiaTrackables targets = vuforia.loadTrackablesFromAsset("RoverRuckus");
-        targets.get(0).setName("Blue_Crater");
-        targets.get(1).setName("Blue_Depot");
-        targets.get(2).setName("Red_Crater");
-        targets.get(3).setName("Red_Depot");
-
-        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
-        allTrackables.addAll(targets);
-
-        float mmPerInch        = 25.4f;
-        float mmBotWidth       = 18 * mmPerInch;            // ... or whatever is right for your robot
-        float mmFTCFieldWidth  = (12*12 - 2) * mmPerInch;   // the FTC field is ~11'10" center-to-center of the glass panels
-
-        targetOrientation = OpenGLMatrix.translation(0,0,150)
-                .multiplied(Orientation.getRotationMatrix(
-                        AxesReference.EXTRINSIC,
-                        AxesOrder.XYZ,
-                        AngleUnit.DEGREES,
-                        90,
-                        0 ,
-                        -90
-                ));
-
-        robotFromCamera = OpenGLMatrix
-                .translation(mmBotWidth/2,0,0)
-                .multiplied(Orientation.getRotationMatrix(
-                        AxesReference.EXTRINSIC, AxesOrder.XZY,
-                        AngleUnit.DEGREES, 90, 90, 0));
-
-        for (VuforiaTrackable trackable : allTrackables)
-        {
-            trackable.setLocation(targetOrientation);
-            ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
-        }
-
-
-
-    }
-    */
 
     public static String targetsAreVisible(){
 
-        int targetTestID = 0;
-        /*while((targetTestID < MAX_TARGETS) && !targetIsVisible(targetTestID)){
-            targetTestID++;
-        }*/
 
-       // for(int targetTestID = 0;(targetTestID < MAX_TARGETS) && !targetIsVisible(targetTestID); targetTestID++);
-       /* while ((targetTestID < MAX_TARGETS) && !targetIsVisible(targetTestID)) {
-            targetTestID++ ;
+        //Setup Vuforia Trackers for each marker
+        VuforiaTrackableDefaultListener listenerBLP = (VuforiaTrackableDefaultListener)targetBLP.getListener();
+        VuforiaTrackableDefaultListener listenerRDP = (VuforiaTrackableDefaultListener)targetRDP.getListener();
+        VuforiaTrackableDefaultListener listenerFRP = (VuforiaTrackableDefaultListener)targetFRP.getListener();
+        VuforiaTrackableDefaultListener listenerBKP = (VuforiaTrackableDefaultListener)targetBKP.getListener();
+
+        //Logic for Returning which target is visible
+        if(listenerBLP.isVisible()){
+            targetString = "BlueAlliance";
         }
-
-*/
-       targetIsVisible(3);
-        return targetString;
-    }
-
-    public static boolean targetIsVisible(int targetID){
-/*
-        //VuforiaTrackable target = targets.get(targetID);
-        VuforiaTrackableDefaultListener listener = (VuforiaTrackableDefaultListener)target.getListener();
-        OpenGLMatrix location  = null;
-
-        // if we have a target, look for an updated robot position
-        if ((target != null) && (listener != null) && listener.isVisible()) {
-            targetFound = true;
-            targetString = target.getName();
-
-            targetFound = true;
+        else if (listenerRDP.isVisible()){
+            targetString = "RedAlliance";
         }
-        else  {
-            targetFound = false;
+        else if (listenerFRP.isVisible()){
+            targetString = "FrontWall";
+        }
+        else if (listenerBKP.isVisible()){
+            targetString = "BackWall";
+        }
+        else{
             targetString = "None";
         }
 
-*/
-        return targetFound;
+
+        return targetString;
     }
+
 }
 
 
