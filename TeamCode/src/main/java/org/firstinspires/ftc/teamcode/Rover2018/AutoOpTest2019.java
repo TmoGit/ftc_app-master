@@ -357,7 +357,7 @@ Z	0	0	0	0	1	-1
 
                 routeDesignate();
 
-                    stateStepper(State.STATE_DRIVE_ROUTE, false);
+                  //  stateStepper(State.STATE_DRIVE_ROUTE, false);
 
                 break;
             case STATE_DRIVE_ROUTE:
