@@ -281,6 +281,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if(controlState == 0) {
 
             robotCfg.Motor_ArmBase.setPower(power);
+            robotCfg.Motor_ArmBase2.setPower(-power);
 
             /*
             if(armFirstrun == true){
@@ -453,6 +454,10 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     }
 
+    private void Arm_Retract_Control(double power){
+        robotCfg.Servo_Arm.setPower(power);
+    }
+
     private void Sweeper_Control(double power, int spinTime)
     {
         // int spinTime = 8000;
@@ -589,20 +594,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 
         if(controlState == 0) {
-            //Arm control
-            if (driver2.right_bumper.isPressed()) {
-                Arm_Control(MOTOR_RUNSPEED, 0);
-                telemetry.addData("Arm Movement ", "UP");
-                telemetry.update();
-            } else if (driver2.left_bumper.isPressed()) {
-                Arm_Control(-MOTOR_RUNSPEED, 0);
-                telemetry.addData("Arm Movement ", "DOWN");
-                telemetry.update();
-            } else {
-                robotCfg.Motor_ArmBase.setPower(0.0);
-            }
-
-            //Left Lift Control
+            //Hanging Lift Control
             if (driver1.dpad_up.isPressed()) {
                 Lift_Control(LIFT_RUNSPEED, 0, true);
                 telemetry.addData("Left Lift Movement ", "Up");
@@ -615,57 +607,28 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
                 Lift_Control(0.0, 0, true);
             }
 
-            double rightLiftPower = driver2.right_trigger.getRawValue() - driver2.left_trigger.getRawValue();
+            //Arm Control
+            double armPower = driver2.left_stick_y.getRawValue();
+            Arm_Control(armPower, 0);
 
+            //Scoring Lift Control
+            double rightLiftPower = driver2.right_trigger.getRawValue() - driver2.left_trigger.getRawValue();
             Lift_Control(rightLiftPower, 0, false);
 
-            //Right Lift Movement
-            /*if (driver2.dpad_up.isPressed()) {
-                Lift_Control(LIFT_RUNSPEED, 0, false);
-                telemetry.addData("Right Lift Movement ", "Up");
-                telemetry.update();
-            } else if (driver2.dpad_down.isPressed()) {
-                Lift_Control(-(LIFT_RUNSPEED), 0, false);
-                telemetry.addData("Right Lift Movement ", "DOWN");
-                telemetry.update();
-            } else {
-                Lift_Control(0.0, 0, false);
-            }*/
+            //Arm Retract Control
+            double armRetractPower = driver2.right_stick_y.getRawValue();
+            Arm_Retract_Control(armRetractPower);
 
-            //Bucket Control // servo values are between 0 and 1, 0.5 is stop
-            //BUCKET_POWER = driver2.left_trigger.getRawValue() - driver2.right_trigger.getRawValue();
-
-            Manual_Bucket_Control(driver2.left_stick_y.getRawValue(), true);
-            Manual_Bucket_Control(driver2.right_stick_y.getRawValue(), false);
-
-            if(driver2.x.justPressed()) {
-                if(bucketCaptureRunToggle == false && lastBucketPos == "CAPTURE"){
-                    //bucketDumpRunToggle = true;
-                }
-            }
-            if(driver2.y.justPressed()){
-                if(bucketDumpRunToggle == false && lastBucketPos == "DUMP"){
-                    //bucketCaptureRunToggle = true;
-                }
-            }
-
-            if(bucketDumpRunToggle) {
-                //Preset_Bucket_Control("DUMP", bucketMoveTime);
-            }
-            if(bucketCaptureRunToggle) {
-               // Preset_Bucket_Control("CAPTURE", bucketMoveTime);
-            }
         }
 
-
         //Sweeper Control
-        if(driver2.b.justPressed() && sweeperToggle == false){
+        if(driver2.y.justPressed() && sweeperToggle == false){
             sweeperToggle = true;
-        } else if(driver2.b.justPressed() && sweeperToggle){
+        } else if(driver2.y.justPressed() && sweeperToggle){
             sweeperToggle = false;
         }
 
-        if (driver2.a.isPressed()) {
+        if (driver2.x.isPressed()) {
             Sweeper_Control(-SWEEPER_POWER, 0);
 
         } else if (sweeperToggle) {
@@ -676,41 +639,17 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 
 
-        //Old Sweeper Control Call
-     /*   if(driver2.left_stick_y.getRawValue() >= 0.2){
-            LSWEEPER_POWER = -1;
-        }
-        else if(driver2.left_stick_y.getRawValue() <= -0.2){
-            LSWEEPER_POWER =  1;
-        }
-        else{
-            LSWEEPER_POWER =  0;
-        }
-
-
-        if(driver2.right_stick_y.getRawValue() >= 0.2){
-            RSWEEPER_POWER = -1;
-        }
-        else if(driver2.right_stick_y.getRawValue() <= -0.2){
-            RSWEEPER_POWER =  1;
-        }
-        else{
-            RSWEEPER_POWER =  0;
-        }
-
-        Sweeper_Control(LSWEEPER_POWER, RSWEEPER_POWER);*/
-
         //telemetry.addData("\nBucket Positon", robotCfg.Servo_Out.getPosition());
         //telemetry.addData("\nLeft Stick Input", driver2.left_stick_y.getRawValue());
         //telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
-        telemetry.addData("Current Arm Position: ", robotCfg.Motor_ArmBase.getCurrentPosition());
+        //telemetry.addData("Current Arm Position: ", robotCfg.Motor_ArmBase.getCurrentPosition());
         //telemetry.addData("Current Left Lift Position: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
       //  telemetry.addData("Current Right Lift Position: ", robotCfg.Motor_LiftRight.getCurrentPosition());
         //telemetry.addData("Current Motor_FL Position: ", robotCfg.Motor_WheelFL.getCurrentPosition());
         //telemetry.addData("Current Motor_FR Position: ", robotCfg.Motor_WheelFR.getCurrentPosition());
         //telemetry.addData("Current Motor_BL Position: ", robotCfg.Motor_WheelBL.getCurrentPosition());
         //telemetry.addData("Current Motor_BR Position: ", robotCfg.Motor_WheelBR.getCurrentPosition());
-        telemetry.addData("Current Arm Speed: ", armSpeed);
+        //telemetry.addData("Current Arm Speed: ", armSpeed);
 
 
         if (controlState == 1) {
