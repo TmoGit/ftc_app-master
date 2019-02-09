@@ -126,6 +126,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     public double rawHeading;
 
+    public double gyroStartAngle = 0;
+
 
 
 
@@ -229,7 +231,7 @@ Z	0	0	0	0	1	-1
             000,
             000,
             000,
-            4000,
+            8000,
             500,
             0000,
             0
@@ -362,7 +364,9 @@ Z	0	0	0	0	1	-1
 
 
                  if(routeFound) {
-                   // stateStepper(State.STATE_DRIVE_ROUTE, false);
+                   //  Vuforia.deactivateTracking();
+
+                     stateStepper(State.STATE_DRIVE_ROUTE, false);
                  }
                 break;
             case STATE_DRIVE_ROUTE:
@@ -370,7 +374,7 @@ Z	0	0	0	0	1	-1
                 // Set vectors
                 setDriveStart(CURRENT_ROUTE);
                 CURRENT_DSTEP = CURRENT_STEP_START;
-                getCurrentVector();
+         //       getCurrentVector();
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
@@ -388,7 +392,7 @@ Z	0	0	0	0	1	-1
 
                 if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME,true))){
                  //   if(!robotCfg.Motor_WheelBL.isBusy()) {
-                        stateStepper(State.STATE_DSTEP_2, true);
+                      //  stateStepper(State.STATE_DSTEP_2, true);
                    // }
                 }
 
@@ -509,17 +513,17 @@ Z	0	0	0	0	1	-1
         int route = 0;
         String targetName = Vuforia.targetsAreVisible();
 
-        if(targetName == "BlueAlliance"){
+        /*if(targetName == "BlueAlliance"){
             CURRENT_ROUTE = 1;
             routeFound = true;
 
-        }
+        }*/
 
 
-        //if(!routeFound) {
+        if(!routeFound) {
 
 
-          /*  switch (targetName) {
+           switch (targetName) {
                 case "BlueAlliance":
                     CURRENT_ROUTE = 1;
                    // telemetry.addData("Target ID:", targetName);
@@ -544,9 +548,9 @@ Z	0	0	0	0	1	-1
                     CURRENT_ROUTE = 1;
                     routeFound = false;
                     break;
-            }*/
+            }
 
-        //}
+        }
 
     }
 
@@ -621,6 +625,8 @@ Z	0	0	0	0	1	-1
         int[] error_pos = new int[]{0,0,0,0};
         int current_time = (int)runtime.milliseconds();
 
+
+
         if(drive_first_run){
             drive_first_run = false;
 
@@ -630,6 +636,8 @@ Z	0	0	0	0	1	-1
             drive_target_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
             drive_target_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
             drive_target_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
+
+            gyroStartAngle = getGyroHeading(robotCfg.angles);
         }
 
         //Capture all encoder values, only use back wheel of robot for encoder value
@@ -669,7 +677,7 @@ Z	0	0	0	0	1	-1
 
         //Gyro compensation NOT READY
         if (z==0){
-            z = getCompensation(angle);
+            z = getCompensation(gyroStartAngle);
         }
 
         //Range clipped power to motors
@@ -717,7 +725,9 @@ Z	0	0	0	0	1	-1
         double maxSpeed = 0.5;//1
 
         telemetry.addData("Gyro Heading:", getGyroHeading(robotCfg.angles));
-        telemetry.addData("Current Heading:", currentHeading);
+        //telemetry.addData("Current Heading:", currentHeading);
+        telemetry.addData("Target Heading:", TARGET_HEADING);
+
 
         if (Math.abs(posError) > 180) {
             posError = -360 * Math.signum(posError) + posError;
@@ -738,9 +748,9 @@ Z	0	0	0	0	1	-1
 
         telemetry.addData("Current State:", currentState);
        /* telemetry.addData("State Counter:", stateCounter);
-        telemetry.addData("Current Route #", CURRENT_ROUTE);
+        telemetry.addData("Current Route #", CURRENT_ROUTE);*/
         telemetry.addData("Current D-Step", CURRENT_DSTEP);
-        telemetry.addData("Current Vector X", currentVector[0]);
+      /*  telemetry.addData("Current Vector X", currentVector[0]);
         telemetry.addData("Current Vector Y", currentVector[1]);
         telemetry.addData("Current Vector Z", currentVector[2]);
         telemetry.addData("Runtime:", runtime);

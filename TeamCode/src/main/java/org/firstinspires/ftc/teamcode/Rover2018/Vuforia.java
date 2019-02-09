@@ -89,6 +89,14 @@ public class Vuforia{
         }
     }
 
+    public static void deactivateTracking(){
+        if(targets != null){
+            targets.deactivate();
+
+
+        }
+    }
+
     public static void initVuforia(){
 
         File captureDirectory = AppUtil.ROBOT_DATA_DIR;
