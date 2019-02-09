@@ -76,6 +76,12 @@ public class Vuforia{
 
     private static List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
 
+    //Setup Vuforia Trackers for each marker
+    private static VuforiaTrackableDefaultListener listenerBLP;
+    private static VuforiaTrackableDefaultListener listenerRDP;
+    private static VuforiaTrackableDefaultListener listenerFRP;
+    private static VuforiaTrackableDefaultListener listenerBKP;
+
     //When called activates tracking for targets
     public static void activateTracking(){
         if(targets != null){
@@ -151,18 +157,18 @@ public class Vuforia{
             ((VuforiaTrackableDefaultListener)trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
         }
 
-
+        //Setup Vuforia Trackers for each marker
+        listenerBLP = (VuforiaTrackableDefaultListener)targetBLP.getListener();
+        listenerRDP = (VuforiaTrackableDefaultListener)targetRDP.getListener();
+        listenerFRP = (VuforiaTrackableDefaultListener)targetFRP.getListener();
+        listenerBKP = (VuforiaTrackableDefaultListener)targetBKP.getListener();
 
     }
 
     public static String targetsAreVisible(){
 
 
-        //Setup Vuforia Trackers for each marker
-        VuforiaTrackableDefaultListener listenerBLP = (VuforiaTrackableDefaultListener)targetBLP.getListener();
-        VuforiaTrackableDefaultListener listenerRDP = (VuforiaTrackableDefaultListener)targetRDP.getListener();
-        VuforiaTrackableDefaultListener listenerFRP = (VuforiaTrackableDefaultListener)targetFRP.getListener();
-        VuforiaTrackableDefaultListener listenerBKP = (VuforiaTrackableDefaultListener)targetBKP.getListener();
+
 
         //Logic for Returning which target is visible
         if(listenerBLP.isVisible()){

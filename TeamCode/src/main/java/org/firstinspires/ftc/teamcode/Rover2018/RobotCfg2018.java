@@ -84,7 +84,7 @@ public class RobotCfg2018 extends RobotCfg {
     public DcMotor Motor_WheelFR = null;
     public DcMotor Motor_WheelBL = null;
     public DcMotor Motor_WheelBR = null;
-    public DcMotor Motor_Sweeper = null;
+    //public DcMotor Motor_Sweeper = null;
 
 
     //Defining Servos
@@ -190,7 +190,7 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_ArmBase2 = hardwareMap.get(DcMotor.class, "Motor_ArmBase2");
         Motor_LiftLeft = hardwareMap.get(DcMotor.class, "Motor_LiftLeft");
         Motor_LiftRight = hardwareMap.get(DcMotor.class, "Motor_LiftRight");
-        Motor_Sweeper = hardwareMap.get(DcMotor.class, "Motor_Sweeper");
+       // Motor_Sweeper = hardwareMap.get(DcMotor.class, "Motor_Sweeper");
 
         //This is where we intilize the servos
         Servo_InR = hardwareMap.get(CRServo.class, "Servo_InR");
@@ -214,7 +214,7 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_WheelFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_WheelBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Motor_Sweeper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //Motor_Sweeper.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         // Run using encoders
         Motor_ArmBase.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -226,7 +226,7 @@ public class RobotCfg2018 extends RobotCfg {
         Motor_WheelBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Motor_WheelBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        Motor_Sweeper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+       // Motor_Sweeper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         //Setting limits on the camera
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());

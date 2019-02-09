@@ -174,6 +174,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
 
     public int CURRENT_DSTEP_BUMP_TIME = 0;
 
+    public boolean routeFound = false;
+
     private double[][] routeVectors = new double[][]
 
              /*
@@ -226,10 +228,10 @@ Z	0	0	0	0	1	-1
             4000,
             000,
             000,
-            2000,
-            2000,
-            2000,
-            2000,
+            000,
+            4000,
+            500,
+            0000,
             0
     };
 
@@ -358,8 +360,10 @@ Z	0	0	0	0	1	-1
                 routeDesignate();
                 telemetry.addData("Route Set", CURRENT_ROUTE);
 
-                  //  stateStepper(State.STATE_DRIVE_ROUTE, false);
 
+                 if(routeFound) {
+                   // stateStepper(State.STATE_DRIVE_ROUTE, false);
+                 }
                 break;
             case STATE_DRIVE_ROUTE:
 
@@ -370,7 +374,6 @@ Z	0	0	0	0	1	-1
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-                //Sleep
 
                         stateStepper(State.STATE_DSTEP_1, true);
 
@@ -438,7 +441,7 @@ Z	0	0	0	0	1	-1
                 getCurrentVector();
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
-                robotCfg.Motor_Sweeper.setPower(1);
+               // robotCfg.Motor_Sweeper.setPower(1);
 
                     stateStepper(State.STATE_STOP, true);
 
@@ -450,7 +453,7 @@ Z	0	0	0	0	1	-1
 
                 driveAllStop();
 
-                robotCfg.Motor_Sweeper.setPower(0);
+                //robotCfg.Motor_Sweeper.setPower(0);
 
                     stateStepper(State.STATE_COMPLETE, false);
 
@@ -506,26 +509,44 @@ Z	0	0	0	0	1	-1
         int route = 0;
         String targetName = Vuforia.targetsAreVisible();
 
-        telemetry.addData("Target ID:", targetName);
-        telemetry_update();
+        if(targetName == "BlueAlliance"){
+            CURRENT_ROUTE = 1;
+            routeFound = true;
 
-        switch (targetName){
-            case "BlueAlliance":
-                CURRENT_ROUTE = 1;
-                break;
-            case "RedAlliance":
-                CURRENT_ROUTE = 2;
-                break;
-            case "FrontWall":
-                CURRENT_ROUTE = 1;
-                break;
-            case "BackWall":
-                CURRENT_ROUTE = 2;
-                break;
-            case "None":
-                CURRENT_ROUTE = 1;
-                break;
         }
+
+
+        //if(!routeFound) {
+
+
+          /*  switch (targetName) {
+                case "BlueAlliance":
+                    CURRENT_ROUTE = 1;
+                   // telemetry.addData("Target ID:", targetName);
+                    routeFound = true;
+                    break;
+                case "RedAlliance":
+                    CURRENT_ROUTE = 2;
+                  //  telemetry.addData("Target ID:", targetName);
+                    routeFound = true;
+                    break;
+                case "FrontWall":
+                    CURRENT_ROUTE = 1;
+                   // telemetry.addData("Target ID:", targetName);
+                    routeFound = true;
+                    break;
+                case "BackWall":
+                    CURRENT_ROUTE = 2;
+                   // telemetry.addData("Target ID:", targetName);
+                    routeFound = true;
+                    break;
+                case "None":
+                    CURRENT_ROUTE = 1;
+                    routeFound = false;
+                    break;
+            }*/
+
+        //}
 
     }
 
@@ -647,9 +668,9 @@ Z	0	0	0	0	1	-1
 
 
         //Gyro compensation NOT READY
-       // if (z==0){
-         //   z = getCompensation(angle);
-        //}
+        if (z==0){
+            z = getCompensation(angle);
+        }
 
         //Range clipped power to motors
         wheelPowers[0] = rangeClipDouble((x1 + y1 + z),-1,1);
@@ -695,6 +716,8 @@ Z	0	0	0	0	1	-1
         double minSpeed = .35;
         double maxSpeed = 0.5;//1
 
+        telemetry.addData("Gyro Heading:", getGyroHeading(robotCfg.angles));
+        telemetry.addData("Current Heading:", currentHeading);
 
         if (Math.abs(posError) > 180) {
             posError = -360 * Math.signum(posError) + posError;
@@ -704,16 +727,17 @@ Z	0	0	0	0	1	-1
             rotation = rotation * Math.signum(posError);
         }
 
-
+        telemetry.addData("Rotation Error:", rotation);
+        telemetry.update();
 
         return rotation;
     }
 
     private void telemetry_update(){
      // Telemetry writes, can remove for competition
-/*
+
         telemetry.addData("Current State:", currentState);
-        telemetry.addData("State Counter:", stateCounter);
+       /* telemetry.addData("State Counter:", stateCounter);
         telemetry.addData("Current Route #", CURRENT_ROUTE);
         telemetry.addData("Current D-Step", CURRENT_DSTEP);
         telemetry.addData("Current Vector X", currentVector[0]);
