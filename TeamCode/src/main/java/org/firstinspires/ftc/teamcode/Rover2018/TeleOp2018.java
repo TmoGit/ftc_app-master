@@ -281,7 +281,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if(controlState == 0) {
 
             robotCfg.Motor_ArmBase.setPower(power);
-            robotCfg.Motor_ArmBase2.setPower(-power);
+          //  robotCfg.Motor_ArmBase2.setPower(-power);
 
             /*
             if(armFirstrun == true){
@@ -473,7 +473,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         //   robotCfg.Servo_InR.setPosition(rPos);
         if(controlState == 0) {
 
-            robotCfg.Servo_InR.setPower(power);
+            robotCfg.Motor_Sweeper.setPower(power);
             //robotCfg.Servo_InR.setPower(rightPower);
             //robotCfg.Servo_InL.setPower(-leftPower);
         } else if(controlState == 1){
@@ -483,7 +483,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
             //while(getRuntime() <= endTime && opModeIsActive()) {
 
-           // robotCfg.Motor_Sweeper.setPower(power);
+            //robotCfg.Motor_Sweeper.setPower(power);
 
             Spin_Active_Flag = true;
             //}
