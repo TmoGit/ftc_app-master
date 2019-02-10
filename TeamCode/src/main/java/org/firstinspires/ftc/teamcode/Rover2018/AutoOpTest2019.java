@@ -415,7 +415,7 @@ Z	0	0	0	0	1	-1
 
                 if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))) {
                    // if (!robotCfg.Motor_WheelBL.isBusy()) {
-                    //    stateStepper(State.STATE_DSTEP_4, true);
+                        stateStepper(State.STATE_DSTEP_4, true);
                    // }
                 }
 
@@ -427,9 +427,10 @@ Z	0	0	0	0	1	-1
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
+                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))) {
 
-                  //  stateStepper(State.STATE_DSTEP_5, true);
-
+                      stateStepper(State.STATE_DSTEP_5, true);
+                }
 
                 break;
             case STATE_DSTEP_5:
@@ -438,9 +439,10 @@ Z	0	0	0	0	1	-1
 
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
                // robotCfg.Motor_Sweeper.setPower(1);
+                if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))) {
 
                     stateStepper(State.STATE_STOP, true);
-
+                }
 
                 break;
             case STATE_STOP:
