@@ -167,6 +167,8 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     public int CURRENT_DSTEP_BUMP_TIME = 0;
 
     public boolean routeFound = false;
+    public boolean gyroTurnComplete = false;
+
 
     private double[][] routeVectors = new double[][]
 
@@ -369,7 +371,7 @@ Z	0	0	0	0	1	-1
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
-                        stateStepper(State.STATE_DSTEP_1, true);
+                    stateStepper(State.STATE_DSTEP_1, true);
 
 
                 break;
@@ -382,7 +384,7 @@ Z	0	0	0	0	1	-1
 
                 if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME,true))){
                  //   if(!robotCfg.Motor_WheelBL.isBusy()) {
-                      //  stateStepper(State.STATE_DSTEP_2, true);
+                        stateStepper(State.STATE_DSTEP_2, true);
                    // }
                 }
 
@@ -413,7 +415,7 @@ Z	0	0	0	0	1	-1
 
                 if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))) {
                    // if (!robotCfg.Motor_WheelBL.isBusy()) {
-                        stateStepper(State.STATE_DSTEP_4, true);
+                    //    stateStepper(State.STATE_DSTEP_4, true);
                    // }
                 }
 
@@ -426,7 +428,7 @@ Z	0	0	0	0	1	-1
                 //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
 
-                    stateStepper(State.STATE_DSTEP_5, true);
+                  //  stateStepper(State.STATE_DSTEP_5, true);
 
 
                 break;
@@ -575,10 +577,10 @@ Z	0	0	0	0	1	-1
 
     private void getCurrentVector(){
         // Pulls down Vectors from array
-        currentVector[0] = routeVectors[CURRENT_DSTEP][0];
-        currentVector[1] = routeVectors[CURRENT_DSTEP][1];
-        currentVector[2] = routeVectors[CURRENT_DSTEP][2];
-        currentVector[3] = routeVectors[CURRENT_DSTEP][3];
+        currentVector[0] = routeVectors[CURRENT_DSTEP-1][0];
+        currentVector[1] = routeVectors[CURRENT_DSTEP-1][1];
+        currentVector[2] = routeVectors[CURRENT_DSTEP-1][2];
+        currentVector[3] = routeVectors[CURRENT_DSTEP-1][3];
         CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
 
         CURRENT_DSTEP_BUMP_TIME = routeTimes[CURRENT_STEP_START + CURRENT_DSTEP - 1] - 1000;
@@ -610,6 +612,7 @@ Z	0	0	0	0	1	-1
         int[] error_pos = new int[]{0,0,0,0};
         int current_time = (int)runtime.milliseconds();
 
+
         // First run code
         if(drive_first_run){
             drive_first_run = false;
@@ -620,8 +623,9 @@ Z	0	0	0	0	1	-1
             drive_target_pos[1] = robotCfg.Motor_WheelFR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
             drive_target_pos[2] = robotCfg.Motor_WheelBL.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
             drive_target_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
-
-            gyroStartAngle = getGyroHeading(robotCfg.angles);
+          //  robotCfg.angles = robotCfg.Gyro_Hub.getAngularOrientation(
+            //        AxesReference.INTRINSIC, AxesOrder.XYX, AngleUnit.DEGREES);
+            gyroStartAngle = currentVector[2];
         }
 
         //Capture all encoder values, only use back wheel of robot for encoder value
@@ -666,8 +670,10 @@ Z	0	0	0	0	1	-1
         }
 
         //If there is rotation vector perform turn
-        else if(z!=0){
-            z = gyroTurn();
+        else if((z!=0)){
+            if (gyroTurnComplete ==false) {
+                z = gyroTurn();
+            }
         }
 
         //Range clipped power to motors
@@ -691,13 +697,21 @@ Z	0	0	0	0	1	-1
         }
 
         //remove this after debug
+        /*
         telemetry.addData("FL Power:", wheelPowers[0]);
         telemetry.addData("FR Power:", wheelPowers[1]);
         telemetry.addData("BL Power:", wheelPowers[2]);
         telemetry.addData("BR Power:", wheelPowers[3]);
+        */
+        telemetry.addData("Turn Vector", currentVector[2]);
+        telemetry.addData("Z:",z);
+        telemetry.addData("Current Heading",getGyroHeading(robotCfg.angles));
+        telemetry.addData("Turn Complete?", gyroTurnComplete);
+        /*
         telemetry.addData("Target Position:", drive_target_pos[2]);
         telemetry.addData("Current Position:", current_pos[2]);
         telemetry.addData("Distance Error:", error_pos[2]);
+        */
 
         telemetry.update();
         return output;
@@ -709,18 +723,21 @@ Z	0	0	0	0	1	-1
         double targetRotation = 0.0;
         double currentHeading = getGyroHeading(robotCfg.angles);
         double zUpdate = 0.0;
+        double gryoTurnCompensation = 1;
 
 
         targetRotation = currentVector[2];
 
-        if ((currentHeading >= targetRotation)){
+        if ((currentHeading >= targetRotation- gryoTurnCompensation)){
 
             //Turn off z if gyro is equal to targetRotation
             zUpdate = 0.0;
+            gyroTurnComplete = true;
             return zUpdate;
 
         }
 
+        gyroTurnComplete = false;
         zUpdate = targetRotation;
         return zUpdate;
 
@@ -736,9 +753,9 @@ Z	0	0	0	0	1	-1
         double minSpeed = .35;
         double maxSpeed = 0.5;//1
 
-        telemetry.addData("Gyro Heading:", getGyroHeading(robotCfg.angles));
+       // telemetry.addData("Gyro Heading:", getGyroHeading(robotCfg.angles));
         //telemetry.addData("Current Heading:", currentHeading);
-        telemetry.addData("Target Heading:", TARGET_HEADING);
+       // telemetry.addData("Target Heading:", TARGET_HEADING);
 
 
         if (Math.abs(posError) > 180) {
@@ -749,8 +766,8 @@ Z	0	0	0	0	1	-1
             rotation = rotation * Math.signum(posError);
         }
 
-        telemetry.addData("Rotation Error:", rotation);
-        telemetry.update();
+       // telemetry.addData("Rotation Error:", rotation);
+       // telemetry.update();
 
         return rotation;
     }
