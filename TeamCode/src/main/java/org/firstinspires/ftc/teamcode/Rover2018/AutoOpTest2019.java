@@ -30,33 +30,23 @@
 package org.firstinspires.ftc.teamcode.Rover2018;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.files.Logger;
-import ftc.evlib.hardware.config.RobotCfg;
-import ftc.evlib.hardware.control.RotationControls;
-import ftc.evlib.hardware.control.TranslationControls;
 import ftc.evlib.opmodes.AbstractFixedAutoOp;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.Hardware;
-
-import org.firstinspires.ftc.robotcore.external.navigation.*;
 
 import java.util.Locale;
 
@@ -209,7 +199,7 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{0.35, 0.0, 0.0, 0.3}, {0.0, -0.75, 0.0, 1.5}, {1.0, 0.0, 0.0, 2.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+            {{0.35, 0.0, 0.0, 0.3}, {0.0, -0.75, 0.0, 1.5}, {0.0, 0.0, 90.0, 0.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                     //Vector positions 6-11 is for Route 2
                     {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
@@ -513,13 +503,6 @@ Z	0	0	0	0	1	-1
         int route = 0;
         String targetName = Vuforia.targetsAreVisible();
 
-        /*if(targetName == "BlueAlliance"){
-            CURRENT_ROUTE = 1;
-            routeFound = true;
-
-        }*/
-
-
         if(!routeFound) {
 
 
@@ -614,6 +597,8 @@ Z	0	0	0	0	1	-1
         robotCfg.Motor_WheelBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
+
+
     private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, int drive_time, boolean isDStep) {
         //Main Drive Routine
         boolean output = false;
@@ -625,8 +610,7 @@ Z	0	0	0	0	1	-1
         int[] error_pos = new int[]{0,0,0,0};
         int current_time = (int)runtime.milliseconds();
 
-
-
+        // First run code
         if(drive_first_run){
             drive_first_run = false;
 
@@ -668,6 +652,7 @@ Z	0	0	0	0	1	-1
         V_3 = Vd * Math.cos(-Td + (Math.PI / 4)) - Vt;
         V_4 = Vd * Math.sin(-Td + (Math.PI / 4)) + Vt;
 */
+
         double cosA = Math.cos(Math.toRadians(angle));
         double sinA = Math.sin(Math.toRadians(angle));
         double x1 = x * cosA - y * sinA;
@@ -675,9 +660,14 @@ Z	0	0	0	0	1	-1
         double[] wheelPowers = new double[4];
 
 
-        //Gyro compensation NOT READY
+        //Gyro compensation enable but not tested
         if (z==0){
             z = getCompensation(gyroStartAngle);
+        }
+
+        //If there is rotation vector perform turn
+        else if(z!=0){
+            z = gyroTurn();
         }
 
         //Range clipped power to motors
@@ -714,8 +704,30 @@ Z	0	0	0	0	1	-1
 
     }
 
+    private double  gyroTurn(){
+        //Gyro turn code
+        double targetRotation = 0.0;
+        double currentHeading = getGyroHeading(robotCfg.angles);
+        double zUpdate = 0.0;
+
+
+        targetRotation = currentVector[2];
+
+        if ((currentHeading >= targetRotation)){
+
+            //Turn off z if gyro is equal to targetRotation
+            zUpdate = 0.0;
+            return zUpdate;
+
+        }
+
+        zUpdate = targetRotation;
+        return zUpdate;
+
+    }
+
     double getCompensation(double TARGET_HEADING) {
-        //Heading compensation, this is not implemented
+        //Heading compensation, this has not been tested
         double rotation = 0.0;
         double currentHeading = getGyroHeading(robotCfg.angles);
         double targetHeading = TARGET_HEADING;
@@ -744,7 +756,8 @@ Z	0	0	0	0	1	-1
     }
 
     private void telemetry_update(){
-     // Telemetry writes, can remove for competition
+     // Telemetry writes, can remove for competition, telemetry is
+        // written all over the place can move updates all to this routine for cleanup.
 
         telemetry.addData("Current State:", currentState);
        /* telemetry.addData("State Counter:", stateCounter);
@@ -806,7 +819,7 @@ Z	0	0	0	0	1	-1
         isRunning = true;
 
 
-
+        //Gryo IMU setup, can be moved to RobotConfig2018 for cleanup
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -819,6 +832,7 @@ Z	0	0	0	0	1	-1
 
         runtime.reset();
 
+        // Start Vuforia target tracking
         Vuforia.initVuforia();
         Vuforia.activateTracking();
     }
