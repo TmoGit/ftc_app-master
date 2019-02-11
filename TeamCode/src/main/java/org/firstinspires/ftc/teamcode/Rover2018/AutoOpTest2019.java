@@ -36,6 +36,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import ftc.electronvolts.util.InputExtractor;
 import ftc.electronvolts.util.Vector2D;
 import ftc.electronvolts.util.files.Logger;
+import ftc.evlib.hardware.config.RobotCfg;
 import ftc.evlib.opmodes.AbstractFixedAutoOp;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -106,6 +107,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     static final double     SERVO_STOP              = 0.5;
     boolean isRunning = false;
     boolean isStepping = false;
+
 
     boolean liftFirst = true;
     int liftEndTime = 0;
@@ -201,7 +203,7 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{0.35, 0.0, 0.0, 0.3}, {0.0, -0.75, 0.0, 1.5}, {0.0, 0.0, 90.0, 0.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+            {{-0.5, 0.0, 0.0, 0.3}, {0.5, 0.0, 0.0, 1.5}, {1.0, 0.0, 0.52, 0.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
 
                     //Vector positions 6-11 is for Route 2
                     {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
@@ -366,10 +368,6 @@ Z	0	0	0	0	1	-1
                 // Set vectors
                 setDriveStart(CURRENT_ROUTE);
                 CURRENT_DSTEP = CURRENT_STEP_START;
-         //       getCurrentVector();
-
-                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
-
 
                     stateStepper(State.STATE_DSTEP_1, true);
 
@@ -385,7 +383,7 @@ Z	0	0	0	0	1	-1
                 if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME,true))){
                  //   if(!robotCfg.Motor_WheelBL.isBusy()) {
                         stateStepper(State.STATE_DSTEP_2, true);
-                   // }
+
                 }
 
                 break;
@@ -393,18 +391,14 @@ Z	0	0	0	0	1	-1
 
                 getCurrentVector();
 
-                //Forward_Control(currentVector[0],currentVector[1], currentVector[2],CURRENT_TIME_INT);
 
-               // if (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], true)) {
-                //      if(!robotCfg.Motor_WheelBL.isBusy()) {
                 if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))){
                    // if(!robotCfg.Motor_WheelBL.isBusy()) {
                         stateStepper(State.STATE_DSTEP_3, true);
-                   // }
+
                 }
 
-                //     }
-                // }
+
 
                 break;
             case STATE_DSTEP_3:
@@ -608,7 +602,7 @@ Z	0	0	0	0	1	-1
         boolean output = false;
         double x = rangeClipDouble(speed, -1, 1);
         double y = rangeClipDouble(direction_speed, -1, 1);
-        double z = rangeClipDouble(rotation, -1, 1);
+        double z = rangeClipDouble(rotation, 0, (2*Math.PI));
         int[] current_pos = new int[]{0,0,0,0};
         int[] target_pos = new int[]{0,0,0,0};
         int[] error_pos = new int[]{0,0,0,0};
@@ -627,7 +621,7 @@ Z	0	0	0	0	1	-1
             drive_target_pos[3] = robotCfg.Motor_WheelBR.getCurrentPosition() + (int) (inchDist * COUNTS_PER_INCH);
           //  robotCfg.angles = robotCfg.Gyro_Hub.getAngularOrientation(
             //        AxesReference.INTRINSIC, AxesOrder.XYX, AngleUnit.DEGREES);
-            gyroStartAngle = currentVector[2];
+            gyroStartAngle = Math.toDegrees(currentVector[2]);
         }
 
         //Capture all encoder values, only use back wheel of robot for encoder value
@@ -646,8 +640,6 @@ Z	0	0	0	0	1	-1
         robotCfg.angles = robotCfg.Gyro_Hub.getAngularOrientation(
                 AxesReference.INTRINSIC, AxesOrder.XYX, AngleUnit.DEGREES);
 
-        double angle = getGyroHeading(robotCfg.angles);
-
 
 
 /*
@@ -657,12 +649,19 @@ Z	0	0	0	0	1	-1
         V_2 = Vd * Math.cos(-Td + (Math.PI / 4)) + Vt;
         V_3 = Vd * Math.cos(-Td + (Math.PI / 4)) - Vt;
         V_4 = Vd * Math.sin(-Td + (Math.PI / 4)) + Vt;
+
+
+
 */
 
-        double cosA = Math.cos(Math.toRadians(angle));
-        double sinA = Math.sin(Math.toRadians(angle));
+
+        /*
+        double cosA = Math.cos(Math.toRadians(gyroStartAngle));
+        double sinA = Math.sin(Math.toRadians(gyroStartAngle));
         double x1 = x * cosA - y * sinA;
         double y1 = x * sinA + y * cosA;
+        */
+
         double[] wheelPowers = new double[4];
 
 
@@ -679,10 +678,16 @@ Z	0	0	0	0	1	-1
         }
 
         //Range clipped power to motors
+        /*
         wheelPowers[0] = rangeClipDouble((x1 + y1 + z),-1,1);
         wheelPowers[1] = rangeClipDouble(( -x1 + y1 - z),-1,1);
         wheelPowers[2] = rangeClipDouble((-x1 + y1 + z),-1,1);
         wheelPowers[3] = rangeClipDouble((x1 + y1 - z),-1,1);
+        */
+        wheelPowers[0] = x * Math.sin(-z + (Math.PI / 4)) - y;
+        wheelPowers[1] = x * Math.cos(-z + (Math.PI / 4)) + y;
+        wheelPowers[2] = x * Math.cos(-z + (Math.PI / 4)) - y;
+        wheelPowers[3] = x * Math.sin(-z + (Math.PI / 4)) + y;
 
         //Check time and distance
         if ((!stateTimeCheck(isDStep)) && (current_time < drive_target_time || (!(current_pos[2] >= target_pos[2]) || (error_pos[2]>=100)))){
@@ -705,7 +710,7 @@ Z	0	0	0	0	1	-1
         telemetry.addData("BL Power:", wheelPowers[2]);
         telemetry.addData("BR Power:", wheelPowers[3]);
         */
-        telemetry.addData("Turn Vector", currentVector[2]);
+        telemetry.addData("Turn Vector", Math.toDegrees(currentVector[2]));
         telemetry.addData("Z:",z);
         telemetry.addData("Current Heading",getGyroHeading(robotCfg.angles));
         telemetry.addData("Turn Complete?", gyroTurnComplete);
@@ -728,7 +733,7 @@ Z	0	0	0	0	1	-1
         double gryoTurnCompensation = 1;
 
 
-        targetRotation = currentVector[2];
+        targetRotation = Math.toDegrees(currentVector[2]);
 
         if ((currentHeading >= targetRotation- gryoTurnCompensation)){
 
@@ -754,10 +759,6 @@ Z	0	0	0	0	1	-1
         double epsilon = 3;
         double minSpeed = .35;
         double maxSpeed = 0.5;//1
-
-       // telemetry.addData("Gyro Heading:", getGyroHeading(robotCfg.angles));
-        //telemetry.addData("Current Heading:", currentHeading);
-       // telemetry.addData("Target Heading:", TARGET_HEADING);
 
 
         if (Math.abs(posError) > 180) {
