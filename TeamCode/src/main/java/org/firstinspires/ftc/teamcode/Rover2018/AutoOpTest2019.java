@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode.Rover2018;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import ftc.electronvolts.util.InputExtractor;
@@ -198,21 +199,22 @@ Y	0	1	-1	0	0	0
 Z	0	0	0	0	1	-1
 
 4 Vector array element is magnitude i.e. distance in inches
+5 Vector array element is turn setpoint in degrees, must have a z value for speed of rotation
 
 */
 
             //Vector positions 0-5 is for Route 1
 
-            {{-0.5, 0.0, 0.0, 0.3}, {0.5, 0.0, 0.0, 1.5}, {1.0, 0.0, 0.52, 0.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+            {{-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.0, 0.3, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
 
                     //Vector positions 6-11 is for Route 2
-                    {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+                    {-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.3, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
 
                     //Vector positions 12-17 is for Route 3
-                    {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+                    {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3},
 
                             //Vector positions 18-23 is for Route 4
-                    {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0}, {1.0, 0.0, 0.0, 8.0},
+                    {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3},
 
     };
 
@@ -577,6 +579,7 @@ Z	0	0	0	0	1	-1
         currentVector[1] = routeVectors[CURRENT_DSTEP-1][1];
         currentVector[2] = routeVectors[CURRENT_DSTEP-1][2];
         currentVector[3] = routeVectors[CURRENT_DSTEP-1][3];
+        currentVector[4] = routeVectors[CURRENT_DSTEP-1][4];
         CURRENT_TIME_INT = routeTimes[CURRENT_DSTEP];
 
         CURRENT_DSTEP_BUMP_TIME = routeTimes[CURRENT_STEP_START + CURRENT_DSTEP - 1] - 1000;
@@ -597,12 +600,12 @@ Z	0	0	0	0	1	-1
 
 
 
-    private boolean driveControl(double speed, double direction_speed, double rotation, double inchDist, int drive_time, boolean isDStep) {
+    private boolean driveControl(double xspeed, double yspeed, double rotation_speed, double inchDist, int drive_time, boolean isDStep) {
         //Main Drive Routine
         boolean output = false;
-        double x = rangeClipDouble(speed, -1, 1);
-        double y = rangeClipDouble(direction_speed, -1, 1);
-        double z = rangeClipDouble(rotation, 0, (2*Math.PI));
+        double x = rangeClipDouble(xspeed, -1, 1);
+        double y = rangeClipDouble(yspeed, -1, 1);
+        double z = rangeClipDouble(rotation_speed, -1, 1); // rotational speed not angle
         int[] current_pos = new int[]{0,0,0,0};
         int[] target_pos = new int[]{0,0,0,0};
         int[] error_pos = new int[]{0,0,0,0};
@@ -612,6 +615,7 @@ Z	0	0	0	0	1	-1
         // First run code
         if(drive_first_run){
             drive_first_run = false;
+
 
             drive_target_time = current_time + drive_time;
 
@@ -655,12 +659,12 @@ Z	0	0	0	0	1	-1
 */
 
 
-        /*
-        double cosA = Math.cos(Math.toRadians(gyroStartAngle));
-        double sinA = Math.sin(Math.toRadians(gyroStartAngle));
+
+        double cosA = Math.cos(z);
+        double sinA = Math.sin(z);
         double x1 = x * cosA - y * sinA;
         double y1 = x * sinA + y * cosA;
-        */
+
 
         double[] wheelPowers = new double[4];
 
@@ -678,17 +682,17 @@ Z	0	0	0	0	1	-1
         }
 
         //Range clipped power to motors
-        /*
+
         wheelPowers[0] = rangeClipDouble((x1 + y1 + z),-1,1);
         wheelPowers[1] = rangeClipDouble(( -x1 + y1 - z),-1,1);
         wheelPowers[2] = rangeClipDouble((-x1 + y1 + z),-1,1);
         wheelPowers[3] = rangeClipDouble((x1 + y1 - z),-1,1);
-        */
+        /*
         wheelPowers[0] = x * Math.sin(-z + (Math.PI / 4)) - y;
         wheelPowers[1] = x * Math.cos(-z + (Math.PI / 4)) + y;
         wheelPowers[2] = x * Math.cos(-z + (Math.PI / 4)) - y;
         wheelPowers[3] = x * Math.sin(-z + (Math.PI / 4)) + y;
-
+*/
         //Check time and distance
         if ((!stateTimeCheck(isDStep)) && (current_time < drive_target_time || (!(current_pos[2] >= target_pos[2]) || (error_pos[2]>=100)))){
             robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
@@ -733,7 +737,7 @@ Z	0	0	0	0	1	-1
         double gryoTurnCompensation = 1;
 
 
-        targetRotation = Math.toDegrees(currentVector[2]);
+        targetRotation = currentVector[4];
 
         if ((currentHeading >= targetRotation- gryoTurnCompensation)){
 
@@ -850,6 +854,10 @@ Z	0	0	0	0	1	-1
 
         robotCfg.Gyro_Hub.initialize(parameters);
 
+        /*May be needed for these drive equations
+        robotCfg.Motor_WheelFR.setDirection(DcMotor.Direction.REVERSE);
+        robotCfg.Motor_WheelBR.setDirection(DcMotor.Direction.REVERSE);
+        */
         runtime.reset();
 
         // Start Vuforia target tracking
