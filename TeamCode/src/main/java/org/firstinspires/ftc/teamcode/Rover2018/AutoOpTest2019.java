@@ -205,10 +205,10 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.0, 0.3, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
+            {{-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.0, 0.3, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
 
                     //Vector positions 6-11 is for Route 2
-                    {-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.3, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
+                    {-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.3, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
 
                     //Vector positions 12-17 is for Route 3
                     {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3},
@@ -221,22 +221,24 @@ Z	0	0	0	0	1	-1
 
     private int[] stepTimes = new int[]{
             // Sequencer step intervals, these need to match drive step times and equal 30s
+            //Check these against routetimes
             2000,
             000,
             4000,
             000,
             000,
             000,
-            8000,
-            500,
-            0000,
+            6000,
+            5000,
+            13000,
             0
     };
 
     // Steps for driving are sequential 1 - XX
+
     private int[] routeTimes = new int[]{
             // Drive intervals need to equal up to 30s - time to execute other steps
-            2000, 4000, 7000, 0000, 0000, 4000,
+            4000, 4000, 7000, 0000, 0000, 4000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000,
             2000, 2000, 2000, 2000, 2000, 2000
@@ -287,6 +289,8 @@ Z	0	0	0	0	1	-1
         }
 
         return output;
+
+
     }
 
 
@@ -315,7 +319,7 @@ Z	0	0	0	0	1	-1
 
         switch (currentState){
             case STATE_INITIAL:
-
+            //Step 0: 2s
 
 
 
@@ -323,12 +327,14 @@ Z	0	0	0	0	1	-1
 
                 break;
             case STATE_MOVE_ARM:
+                //Step 1: 0 secs
 
 
                     stateStepper(State.STATE_DROP, false);
 
                 break;
             case STATE_DROP:
+                //Step 2: 0 secs
 
                 if(Lift_Control(0.5, 3000)) {
                     stateStepper(State.STATE_DETACH_LANDER, false);
@@ -336,24 +342,27 @@ Z	0	0	0	0	1	-1
 
                 break;
             case STATE_DETACH_LANDER:
+                //Step 3: 0 secs
 
 
                     stateStepper(State.STATE_RETRACT_LIFT, false);
 
                 break;
             case STATE_RETRACT_LIFT:
-
+                //Step 4: 0 secs
 
                     stateStepper(State.STATE_RETRACT_ARM, false);
 
                 break;
             case STATE_RETRACT_ARM:
+                //Step 5: 0 secs
 
 
                     stateStepper(State.STATE_ESTABLISH_POSITION, false);
 
                 break;
             case STATE_ESTABLISH_POSITION:
+                //Step 6: 0 secs
 
                 routeDesignate();
                 telemetry.addData("Route Set", CURRENT_ROUTE);
@@ -366,7 +375,7 @@ Z	0	0	0	0	1	-1
                 // }
                 break;
             case STATE_DRIVE_ROUTE:
-
+                //Step 7: 5 secs
                 // Set vectors
                 setDriveStart(CURRENT_ROUTE);
                 CURRENT_DSTEP = CURRENT_STEP_START;
@@ -378,8 +387,9 @@ Z	0	0	0	0	1	-1
 
 
             case STATE_DSTEP_1:
+                //Step 8: 13 secs for all drive steps
 
-               // getCurrentVector();
+                getCurrentVector();
 
 
                 if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME,true))){
@@ -442,7 +452,7 @@ Z	0	0	0	0	1	-1
 
                 break;
             case STATE_STOP:
-
+                //Step 9: 0 secs
                 //All Stop
 
                 driveAllStop();
