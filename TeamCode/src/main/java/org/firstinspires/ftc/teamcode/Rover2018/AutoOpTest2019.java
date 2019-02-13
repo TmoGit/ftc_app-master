@@ -129,7 +129,7 @@ public class AutoOpTest2019 extends AbstractFixedAutoOp<RobotCfg2018>  {
     private double[] currentVector = new double[]{
 
      //Initialize vectors as 0.0
-            0.0, 0.0, 0.0, 0.0
+            0.0, 0.0, 0.0, 0.0, 0.0
 
     };
 
@@ -379,7 +379,7 @@ Z	0	0	0	0	1	-1
 
             case STATE_DSTEP_1:
 
-                getCurrentVector();
+               // getCurrentVector();
 
 
                 if((driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME,true))){
