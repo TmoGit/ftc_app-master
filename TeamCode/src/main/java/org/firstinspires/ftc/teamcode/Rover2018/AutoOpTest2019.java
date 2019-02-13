@@ -359,11 +359,11 @@ Z	0	0	0	0	1	-1
                 telemetry.addData("Route Set", CURRENT_ROUTE);
 
 
-                 if(routeFound) {
+                // if(routeFound) {
                    //  Vuforia.deactivateTracking();
 
                      stateStepper(State.STATE_DRIVE_ROUTE, false);
-                 }
+                // }
                 break;
             case STATE_DRIVE_ROUTE:
 
@@ -694,11 +694,11 @@ Z	0	0	0	0	1	-1
         wheelPowers[3] = x * Math.sin(-z + (Math.PI / 4)) + y;
 */
         //Check time and distance
-        if ((!stateTimeCheck(isDStep)) && (current_time < drive_target_time || (!(current_pos[2] >= target_pos[2]) || (error_pos[2]>=100)))){
-            robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
-            robotCfg.Motor_WheelFR.setPower(wheelPowers[1]);
-            robotCfg.Motor_WheelBL.setPower(wheelPowers[2]);
-            robotCfg.Motor_WheelBR.setPower(wheelPowers[3]);
+        if (!stateTimeCheck(isDStep) && !(error_pos[2] >= 100) ){
+                robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
+                robotCfg.Motor_WheelFR.setPower(wheelPowers[1]);
+                robotCfg.Motor_WheelBL.setPower(wheelPowers[2]);
+                robotCfg.Motor_WheelBR.setPower(wheelPowers[3]);
         }
         else{
             output = true;
