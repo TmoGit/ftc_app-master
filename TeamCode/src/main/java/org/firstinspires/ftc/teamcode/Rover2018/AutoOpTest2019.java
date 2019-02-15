@@ -205,10 +205,10 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.0, 0.3, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
+            {{-0.5, 0.0, 0.0, 0.0, 0.0}, {0.5, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 180.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
 
                     //Vector positions 6-11 is for Route 2
-                    {-0.5, 0.0, 0.0, 0.3, 0.0}, {0.5, 0.0, 0.3, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 30.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
+                    {-0.5, 0.0, 0.0, 0.0, 0.0}, {0.5, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 180.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
 
                     //Vector positions 12-17 is for Route 3
                     {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3}, {-0.5, 0.0, 0.0, 0.0, 0.3},
@@ -406,7 +406,7 @@ Z	0	0	0	0	1	-1
 
                 if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))){
                    // if(!robotCfg.Motor_WheelBL.isBusy()) {
-                        stateStepper(State.STATE_DSTEP_3, true);
+                     //   stateStepper(State.STATE_DSTEP_3, true);
 
                 }
 
@@ -688,6 +688,7 @@ Z	0	0	0	0	1	-1
         else if((z!=0)){
             if (gyroTurnComplete ==false) {
                 z = gyroTurn();
+
             }
         }
 
@@ -704,7 +705,9 @@ Z	0	0	0	0	1	-1
         wheelPowers[3] = x * Math.sin(-z + (Math.PI / 4)) + y;
 */
         //Check time and distance
-        if (!stateTimeCheck(isDStep) && !(error_pos[2] >= 100) ){
+        if (!stateTimeCheck(isDStep) && (!(error_pos[2] >= 100)|| !(gyroTurnComplete)) ){
+
+        //if ( (!(error_pos[2] >= 100)|| !(gyroTurnComplete)) ){
                 robotCfg.Motor_WheelFL.setPower(wheelPowers[0]);
                 robotCfg.Motor_WheelFR.setPower(wheelPowers[1]);
                 robotCfg.Motor_WheelBL.setPower(wheelPowers[2]);
@@ -718,14 +721,20 @@ Z	0	0	0	0	1	-1
         }
 
         //remove this after debug
-        /*
+
         telemetry.addData("FL Power:", wheelPowers[0]);
         telemetry.addData("FR Power:", wheelPowers[1]);
         telemetry.addData("BL Power:", wheelPowers[2]);
         telemetry.addData("BR Power:", wheelPowers[3]);
-        */
+
         telemetry.addData("Turn Vector", Math.toDegrees(currentVector[2]));
         telemetry.addData("Z:",z);
+        /*
+        telemetry.addData("Current Vector 0", currentVector[0]);
+        telemetry.addData("Current Vector 1", currentVector[1]);
+        telemetry.addData("Current Vector 2", currentVector[2]);
+        telemetry.addData("Current Vector 3", currentVector[3]);
+        */
         telemetry.addData("Current Heading",getGyroHeading(robotCfg.angles));
         telemetry.addData("Turn Complete?", gyroTurnComplete);
         /*
