@@ -1,28 +1,28 @@
 package org.firstinspires.ftc.teamcode.Rover2018;
 
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.io.BaseEncoding;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.exception.RobotCoreException;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.robot.Robot;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.robot.Robot;
-import com.qualcomm.robotcore.util.Range;
+        import com.google.common.collect.ImmutableList;
+        import com.google.common.io.BaseEncoding;
+        import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+        import com.qualcomm.robotcore.exception.RobotCoreException;
+        import com.qualcomm.robotcore.hardware.DcMotor;
+        import com.qualcomm.robotcore.robot.Robot;
+        import com.qualcomm.robotcore.util.ElapsedTime;
+        import com.qualcomm.robotcore.util.Range;
+        import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+        import com.qualcomm.robotcore.robot.Robot;
+        import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.Rover2018.RobotCfg2018;
+        import org.firstinspires.ftc.teamcode.Rover2018.RobotCfg2018;
 
-import ftc.electronvolts.util.Function;
-import ftc.electronvolts.util.Functions;
-import ftc.electronvolts.util.InputExtractor;
-import ftc.electronvolts.util.InputExtractors;
-import ftc.electronvolts.util.files.Logger;
-import ftc.evlib.hardware.control.RotationControls;
-import ftc.evlib.hardware.control.TranslationControls;
-import ftc.evlib.opmodes.AbstractTeleOp;
+        import ftc.electronvolts.util.Function;
+        import ftc.electronvolts.util.Functions;
+        import ftc.electronvolts.util.InputExtractor;
+        import ftc.electronvolts.util.InputExtractors;
+        import ftc.electronvolts.util.files.Logger;
+        import ftc.evlib.hardware.control.RotationControls;
+        import ftc.evlib.hardware.control.TranslationControls;
+        import ftc.evlib.opmodes.AbstractTeleOp;
 
 
 
@@ -61,7 +61,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
 
     public double LSWEEPER_POWER = 0.0;
     public double RSWEEPER_POWER = 0.0;
-    public double SWEEPER_POWER  = 0.5;
+    public double SWEEPER_POWER  = 0.3; // Changed from 0.5 to 0.3
     public double BUCKET_POWER   = 0.0;
 
     public boolean sweeperToggle = false;
@@ -123,24 +123,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     {
         long endTime = (int)runtime.milliseconds() + sleepTime;
 
-        while(runtime.milliseconds() <= endTime)
-        {
-
-
-        };
-      /*  long wakeupTime = System.currentTimeMillis() + sleepTime;
-
-        while (sleepTime > 0 && opModeIsActive())
-        {
-            try
-            {
-                Thread.sleep(sleepTime);
-            }
-            catch (InterruptedException e)
-            {
-                sleepTime = wakeupTime - System.currentTimeMillis();
-            }
-        } */
+        while(runtime.milliseconds() <= endTime) {}
     }
 
 
@@ -281,7 +264,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         if(controlState == 0) {
 
             robotCfg.Motor_ArmBase.setPower(power);
-          //  robotCfg.Motor_ArmBase2.setPower(-power);
+            //  robotCfg.Motor_ArmBase2.setPower(-power);
 
             /*
             if(armFirstrun == true){
@@ -414,10 +397,10 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     private void Manual_Bucket_Control(double power, boolean baseServo)
     {
         if(baseServo){
-            robotCfg.Servo_Out.setPower(power);
+            //robotCfg.Servo_Out.setPower(power);
         }
         else if(!baseServo){
-            robotCfg.Servo_Out2.setPower(-power);
+            // robotCfg.Out2.setPower(-power);
         }
 
 
@@ -434,10 +417,10 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         }
 
         if (pos == "DUMP") {
-            robotCfg.Servo_Out.setPower(-1);
+            //robotCfg.Servo_Out.setPower(-1);
         }
         else if (pos == "CAPTURE") {
-            robotCfg.Servo_Out.setPower(1);
+            // robotCfg.Servo_Out.setPower(1);
         }
 
         if(currentTime >= bucketEndTime){
@@ -455,7 +438,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
     }
 
     private void Arm_Retract_Control(double power){
-        robotCfg.Servo_Arm.setPower(power);
+        robotCfg.Motor_ArmBase.setPower(power);
     }
 
     private void Sweeper_Control(double power, int spinTime)
@@ -608,16 +591,16 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
             }
 
             //Arm Control
-            double armPower = driver2.left_stick_y.getRawValue();
+            double armPower =(-1 * driver2.left_stick_y.getRawValue()) / 2;
             Arm_Control(armPower, 0);
 
             //Scoring Lift Control
-            double rightLiftPower = driver2.right_trigger.getRawValue() - driver2.left_trigger.getRawValue();
+            double rightLiftPower = driver2.right_stick_y.getRawValue();
             Lift_Control(rightLiftPower, 0, false);
 
             //Arm Retract Control
-            double armRetractPower = driver2.right_stick_y.getRawValue();
-            Arm_Retract_Control(armRetractPower);
+            // double armRetractPower = driver2.right_stick_y.getRawValue();
+            // Arm_Retract_Control(armRetractPower);
 
         }
 
@@ -644,7 +627,7 @@ public class TeleOp2018 extends AbstractTeleOp<RobotCfg2018> {
         //telemetry.addData("\nRight Stick Input", driver2.right_stick_y.getRawValue());
         //telemetry.addData("Current Arm Position: ", robotCfg.Motor_ArmBase.getCurrentPosition());
         //telemetry.addData("Current Left Lift Position: ", robotCfg.Motor_LiftLeft.getCurrentPosition());
-      //  telemetry.addData("Current Right Lift Position: ", robotCfg.Motor_LiftRight.getCurrentPosition());
+        //  telemetry.addData("Current Right Lift Position: ", robotCfg.Motor_LiftRight.getCurrentPosition());
         //telemetry.addData("Current Motor_FL Position: ", robotCfg.Motor_WheelFL.getCurrentPosition());
         //telemetry.addData("Current Motor_FR Position: ", robotCfg.Motor_WheelFR.getCurrentPosition());
         //telemetry.addData("Current Motor_BL Position: ", robotCfg.Motor_WheelBL.getCurrentPosition());

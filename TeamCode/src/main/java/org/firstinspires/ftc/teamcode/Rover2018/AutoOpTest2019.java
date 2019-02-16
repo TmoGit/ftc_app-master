@@ -205,7 +205,7 @@ Z	0	0	0	0	1	-1
 
             //Vector positions 0-5 is for Route 1
 
-            {{-0.5, 0.0, 0.0, 0.0, 0.0}, {0.5, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 180.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
+            {{0.0, -0.5, 0.0, 0.0, 0.0}, {-0.5, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 180.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
 
                     //Vector positions 6-11 is for Route 2
                     {-0.5, 0.0, 0.0, 0.0, 0.0}, {0.5, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.3, 0.0, 180.0}, {1.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0, 0.0},
@@ -406,7 +406,7 @@ Z	0	0	0	0	1	-1
 
                 if( (driveControl(currentVector[0], currentVector[1], currentVector[2], currentVector[3], CURRENT_DSTEP_BUMP_TIME, true))){
                    // if(!robotCfg.Motor_WheelBL.isBusy()) {
-                     //   stateStepper(State.STATE_DSTEP_3, true);
+                        stateStepper(State.STATE_DSTEP_3, true);
 
                 }
 
@@ -873,10 +873,10 @@ Z	0	0	0	0	1	-1
 
         robotCfg.Gyro_Hub.initialize(parameters);
 
-        /*May be needed for these drive equations
-        robotCfg.Motor_WheelFR.setDirection(DcMotor.Direction.REVERSE);
-        robotCfg.Motor_WheelBR.setDirection(DcMotor.Direction.REVERSE);
-        */
+       // May be needed for these drive equations
+       // robotCfg.Motor_WheelFL.setDirection(DcMotor.Direction.REVERSE);
+       // robotCfg.Motor_WheelBL.setDirection(DcMotor.Direction.REVERSE);
+
         runtime.reset();
 
         // Start Vuforia target tracking
